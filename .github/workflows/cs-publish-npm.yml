@@ -1,0 +1,66 @@
+name: publish-npm
+run-name: "${{ format('publish npm {0}', inputs.version) }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to publish (e.g. 1.0.0)"
+        required: true
+        type: string
+
+concurrency: ${{ github.workflow }}-${{ inputs.version }}
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    if: github.repository == 'zgsm-sangfor/opencode'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.MY_SSH_PRIVATE_KEY }}
+
+      - uses: ./.github/actions/setup-bun
+
+      - name: Restore bundled skills cache
+        id: skills-cache
+        uses: actions/cache@v4
+        with:
+          path: packages/opencode/bundled-skills
+          key: bundled-skills-${{ runner.os }}-v1
+          restore-keys: |
+            bundled-skills-${{ runner.os }}-
+
+      - name: Setup npm
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+
+      - name: Generate builtin agents and skills
+        run: bun run --cwd packages/opencode build:builtin
+
+      - name: Publish to npm
+        run: ./packages/opencode/script/publish.ts
+        env:
+          COSTRICT_VERSION: ${{ inputs.version }}
+          COSTRICT_CHANNEL: latest
+          NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish summary
+        if: always()
+        run: |
+          echo "## CoStrict npm publish" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Version: ${{ inputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Channel: latest" >> $GITHUB_STEP_SUMMARY

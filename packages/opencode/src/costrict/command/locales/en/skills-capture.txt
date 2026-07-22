@@ -1,0 +1,67 @@
+# Skill Capture
+
+Extract valuable learnings from the current conversation and record them.
+
+## Execution Steps
+
+1. **Analyze Conversation Context**
+   - Review all interactions in this conversation
+   - Identify key moments: user corrections, error handling, solution discoveries
+
+2. **Identify Learning Type** (choose the most appropriate)
+   - `correction`: User corrections to AI responses
+   - `knowledge_gap`: Discovered knowledge gaps
+   - `best_practice`: Project-specific best practices or patterns
+   - `error_pattern`: Recurring error patterns
+   - `workflow`: Reusable workflows
+
+3. **Generate Learning Entry**
+   - ID format: `LRN-YYYYMMDD-XXX` (e.g., LRN-20260316-001)
+   - Priority: low / medium / high / critical
+   - Status: pending
+
+4. **Save Learning Record**
+   - Append the learning entry to `.costrict/.learnings/LEARNINGS.md`
+   - Create the directory if it doesn't exist
+
+## Learning Entry Template
+
+```markdown
+## [LRN-YYYYMMDD-XXX] <category>
+
+**Logged**: <ISO 8601 datetime>
+**Priority**: <priority>
+**Status**: pending
+**Area**: <frontend/backend/infra/tests/docs/config/general>
+
+### Summary
+<One-line summary>
+
+### Details
+<Detailed description including context, problem, solution>
+
+### Suggested Action
+<Optional: suggested follow-up actions>
+
+### Metadata
+- Source: conversation
+- Related Files: <list of related files, optional>
+- Tags: <list of tags, optional>
+- Pattern-Key: <stable key for deduplication, optional>
+```
+
+## Trigger Conditions
+
+Proactively capture learnings when:
+- User explicitly corrects an AI error
+- Non-obvious solution discovered
+- Project-specific conventions or patterns identified
+- Root cause found for recurring issues
+- Valuable debugging experience worth recording
+
+## Important Notes
+
+- Filter sensitive information (keys, passwords, personal data, etc.)
+- Keep summary concise, details complete
+- Use meaningful Pattern-Key for future deduplication
+- If similar learning exists, increment recurrenceCount instead of creating new entry

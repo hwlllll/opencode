@@ -1,0 +1,141 @@
+#!/usr/bin/env node
+
+import fs from "fs"
+import path from "path"
+import os from "os"
+import { fileURLToPath } from "url"
+import { createRequire } from "module"
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const require = createRequire(import.meta.url)
+
+function detectPlatformAndArch() {
+  // Map platform names
+  let platform
+  switch (os.platform()) {
+    case "darwin":
+      platform = "darwin"
+      break
+    case "linux":
+      platform = "linux"
+      break
+    case "win32":
+      platform = "windows"
+      break
+    default:
+      platform = os.platform()
+      break
+  }
+
+  // Map architecture names
+  let arch
+  switch (os.arch()) {
+    case "x64":
+      arch = "x64"
+      break
+    case "arm64":
+      arch = "arm64"
+      break
+    case "arm":
+      arch = "arm"
+      break
+    default:
+      arch = os.arch()
+      break
+  }
+
+  return { platform, arch }
+}
+
+function findBinary() {
+  const { platform, arch } = detectPlatformAndArch()
+  const packageName = `@costrict/cs-${platform}-${arch}`
+  const binaryName = platform === "windows" ? "cs.exe" : "cs"
+
+  try {
+    // Use require.resolve to find the package
+    const packageJsonPath = require.resolve(`${packageName}/package.json`)
+    const packageDir = path.dirname(packageJsonPath)
+    const binaryPath = path.join(packageDir, "bin", binaryName)
+
+    if (!fs.existsSync(binaryPath)) {
+      throw new Error(`Binary not found at ${binaryPath}`)
+    }
+
+    return { binaryPath, binaryName }
+  } catch (error) {
+    throw new Error(`Could not find package ${packageName}: ${error.message}`)
+  }
+}
+
+function prepareBinDirectory(binaryName) {
+  const binDir = path.join(__dirname, "bin")
+  const targetPath = path.join(binDir, binaryName)
+
+  // Ensure bin directory exists
+  if (!fs.existsSync(binDir)) {
+    fs.mkdirSync(binDir, { recursive: true })
+  }
+
+  // Remove existing binary/symlink if it exists
+  if (fs.existsSync(targetPath)) {
+    fs.unlinkSync(targetPath)
+  }
+
+  return { binDir, targetPath }
+}
+
+function symlinkBinary(sourcePath, binaryName) {
+  const { targetPath } = prepareBinDirectory(binaryName)
+
+  fs.symlinkSync(sourcePath, targetPath)
+  console.log(`cs binary symlinked: ${targetPath} -> ${sourcePath}`)
+
+  // Verify the file exists after operation
+  if (!fs.existsSync(targetPath)) {
+    throw new Error(`Failed to symlink binary to ${targetPath}`)
+  }
+}
+
+async function main() {
+  try {
+    console.log(`[DEBUG] Platform: ${os.platform()}, Arch: ${os.arch()}`)
+    
+    if (os.platform() === "win32") {
+      // On Windows, verify the platform-specific package is installed
+      try {
+        const { binaryPath } = findBinary()
+        console.log(`[DEBUG] Windows binary found at: ${binaryPath}`)
+        console.log("Windows: Platform binary verified successfully")
+      } catch (error) {
+        console.error(`[ERROR] Failed to find Windows binary: ${error.message}`)
+        console.error("[ERROR] This usually means @costrict/cs-windows-x64 was not installed")
+        console.error("[ERROR] Try: npm install @costrict/cs-windows-x64 --save-optional")
+        // Don't exit with error for Windows - let the wrapper handle it
+      }
+      return
+    }
+
+    // On non-Windows platforms, just verify the binary package exists
+    // Don't replace the wrapper script - it handles binary execution
+    const { binaryPath } = findBinary()
+    const target = path.join(__dirname, "bin", ".opencode")
+    if (fs.existsSync(target)) fs.unlinkSync(target)
+    try {
+      fs.linkSync(binaryPath, target)
+    } catch {
+      fs.copyFileSync(binaryPath, target)
+    }
+    fs.chmodSync(target, 0o755)
+  } catch (error) {
+    console.error("Failed to setup cs binary:", error.message)
+    process.exit(1)
+  }
+}
+
+try {
+  main()
+} catch (error) {
+  console.error("Postinstall script error:", error.message)
+  process.exit(0)
+}

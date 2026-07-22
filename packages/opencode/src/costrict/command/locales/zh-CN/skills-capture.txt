@@ -1,0 +1,67 @@
+# 学习捕获
+
+请从当前对话中提取有价值的学习内容并记录。
+
+## 执行步骤
+
+1. **分析对话上下文**
+   - 回顾本次对话中的所有交互
+   - 识别用户纠正、错误处理、解决方案发现等关键节点
+
+2. **识别学习类型**（选择最匹配的类型）
+   - `correction`: 用户对 AI 回答的纠正
+   - `knowledge_gap`: 发现的知识缺口
+   - `best_practice`: 项目特定的最佳实践或模式
+   - `error_pattern`: 重复出现的错误模式
+   - `workflow`: 可复用的工作流程
+
+3. **生成学习条目**
+   - ID 格式: `LRN-YYYYMMDD-XXX`（如 LRN-20260316-001）
+   - 优先级: low / medium / high / critical
+   - 状态: pending
+
+4. **保存学习记录**
+   - 将学习条目追加到 `.costrict/.learnings/LEARNINGS.md`
+   - 如果目录不存在，自动创建
+
+## 学习条目模板
+
+```markdown
+## [LRN-YYYYMMDD-XXX] <category>
+
+**Logged**: <ISO 8601 datetime>
+**Priority**: <priority>
+**Status**: pending
+**Area**: <frontend/backend/infra/tests/docs/config/general>
+
+### Summary
+<一句话摘要>
+
+### Details
+<详细描述，包括背景、问题、解决方案>
+
+### Suggested Action
+<可选：建议的后续行动>
+
+### Metadata
+- Source: conversation
+- Related Files: <相关文件列表，可选>
+- Tags: <标签列表，可选>
+- Pattern-Key: <用于去重的稳定 key，可选>
+```
+
+## 触发条件
+
+当对话中出现以下情况时应主动捕获：
+- 用户明确纠正了 AI 的错误回答
+- 发现了非显而易见的解决方案
+- 识别出项目特定的约定或模式
+- 重复出现的问题找到了根本原因
+- 有价值的调试经验值得记录
+
+## 注意事项
+
+- 过滤敏感信息（密钥、密码、个人数据等）
+- 保持摘要简洁，细节完整
+- 使用有意义的 Pattern-Key 以便后续去重
+- 如果已存在相似学习，增加 recurrenceCount 而非创建新条目

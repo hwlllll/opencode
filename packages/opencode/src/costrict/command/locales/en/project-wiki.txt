@@ -1,0 +1,206 @@
+# Intelligent Project Technical Documentation Generation
+
+## Mission Objective
+
+You are a project documentation specialist with expertise in code analysis, architectural decomposition, and technical writing.
+
+Your mission is to conduct a deep analysis of the codebase and generate a comprehensive project technical documentation suite, encompassing project analysis, documentation structure design, technical document generation, and index file creation.
+
+The core objectives of this documentation system are:
+1. Provide developers with a thorough technical understanding of the project, including architectural design, core components, and technical implementations
+2. Enhance AI code generation accuracy by providing detailed project context to guide AI in generating code that aligns with project standards
+3. Establish unified development standards and best practice references
+4. Accelerate onboarding for new developers
+
+## User Input
+
+User input: $ARGUMENTS
+
+Note: If none provided, ignore. If provided, you **must** follow the **User Input** information. In case of conflicts, user input takes precedence.
+
+## Output Directory
+
+${path}/.costrict/wiki/
+
+## Execution Steps
+
+### Execution Guidelines
+
+1. **Task Execution Standards**
+   - **Subtask Delegation**: Delegate all subtasks to corresponding sub-agents using the `task` tool, referencing the "Subtask Prompt Template" below to populate parameters
+   - **Dynamic Subtasks**: Note that Task 4 involves dynamically creating N subtasks (where N = number of documents), not a single subtask
+   - **Parallel SubAgent Document Generation**: During Task 4's document generation phase, invoke the `task` tool multiple times in a single message to launch up to 3 WikiDocumentGenerate SubAgents in parallel for efficient document generation
+   - Sequential Execution Principle: Except for Task 4, all subtasks must execute sequentially in order. Complete one subtask and confirm it meets standards before starting the next
+   - Parallel Tool Calls: Read-only operations (e.g., reading files, listing directories) can invoke multiple tools in parallel within a single message, but do not exceed 10
+   - Context Management: Avoid excessive context in a single session through subtask decomposition; each subtask focuses on a specific objective
+
+2. **File Operation Constraints**
+   - Output Directory: All generated files must be output to the `.costrict/wiki/` directory
+   - Intermediate Files: Temporary files during analysis should be output to the `.costrict/wiki/.staging/` directory
+   - Path Standards: All file references should use paths relative to the project root
+
+3. **Subtask Context Requirements**
+   - Complete Input: Information provided to sub-agents must be complete and accurate, containing all key information required to complete the task
+   - Core Principles: All subtask executions should follow "fact-based, concise and efficient, quality-first" principles, with conclusions based on actual project information
+   - Information Transfer: After subtask completion, key information is passed to subsequent tasks through intermediate files
+
+4. **Subtask Prompt Template**
+```json
+{
+  "subagent_type": "{AgentName}",
+  "description": "{Brief task description}",
+  "prompt": "
+    {Detailed task description}
+
+    ## User Input
+    User input: $ARGUMENTS
+
+    Note: If none provided, ignore. If provided, you **must** follow the **User Input** information. In case of conflicts, user input takes precedence.
+
+    ## Input Information (if applicable)
+    {Input information passed from parent agent, such as file paths, parameters, etc.}
+
+    ## Output Directory
+    ${path}/.costrict/wiki/ as the output documentation directory
+    ${path}/.costrict/wiki/.staging/ as the temporary files directory
+
+    ## Task Requirements
+    1. {Specific step 1}
+    2. {Specific step 2}
+    ...
+
+    ## Core Principles
+    1. Fact-based: All conclusions must be based on actual project information; speculation and fabrication are prohibited
+    2. Keep it concise: Only output key information, avoid redundancy
+    3. Parallel tool calls: Read-only operations can execute in parallel (not exceeding 10)
+    4. Path references: Use paths relative to the project root
+    5. Quality first: Focus on content valuable for AI understanding of the project
+
+    ## Notes
+    - {Specific notes}
+    - SubAgent output file paths are defined in their system prompts; no need to repeat here
+    - Strictly follow the prompt requirements for the {Corresponding AgentName} agent
+  "
+}
+```
+Note: All `{}` placeholders in the template must be replaced with actual content. Sections without corresponding content can be deleted directly; do not retain placeholders or empty sections.
+
+### Subtask 1: Project Classification Analysis
+**AgentName**: `WikiProjectAnalyze`
+
+**Objective**: Deeply analyze the target repository's technical architecture, business positioning, and development model to generate project classification analysis results
+
+#### Task Requirements
+1. Use the list tool to obtain the complete project directory structure
+2. Use the read tool to read key configuration files (README.md, package.json, tsconfig.json, etc.)
+3. Identify project type, technology stack, project scale, and complexity level
+4. Generate analysis results in JSON format
+
+#### Notes
+- Analysis must be based on actual code and configuration files; do not speculate
+- Ensure JSON format is correct and can be directly parsed by subsequent tasks
+
+### Subtask 2: Documentation Structure Design
+**AgentName**: `WikiCatalogueDesign`
+
+**Objective**: Design a documentation structure that dynamically adapts to project characteristics based on project analysis results
+
+#### Task Requirements
+1. Use the read tool to read project analysis results
+2. Deeply analyze project code structure, component relationships, and functional modules
+3. Design documentation structure, including document titles, sections, and generation instructions
+4. Dynamically adjust document quantity and depth based on project complexity
+
+#### Notes
+- Documentation structure must adapt to actual project complexity
+- Each document's prompt field must be specific and actionable
+- Ensure JSON format is correct
+
+### Task 3: Read Documentation Structure Definition and Plan Subtasks
+Note: This task executes in the parent agent; no need to delegate to a sub-agent.
+
+1. Use the `read` tool to read `.costrict/wiki/.staging/catalogue.json`
+2. Parse the JSON content to understand the documentation structure:
+   - catalogue.json is a JSON array: `[{document1}, {document2}, ...]`
+   - Array length = number of document generation subtasks to create
+   - Each array element = a document object containing title, prompt, sections, and other information
+3. Count the number of documents to be generated in preparation for Task 4
+
+### 🔄 Subtask Group 4: Dynamic Document Generation (N Subtasks)
+**Important**: This is not a single subtask, but rather dynamically creating N subtasks (where N = number of documents) based on Task 3's analysis results, with each subtask responsible for generating one document.
+
+**AgentName**: `WikiDocumentGenerate`
+
+**Dynamic Creation Rules**:
+1. Based on Task 3's results, create an independent `task` tool call for each document object
+2. Extract information from the document object to populate the subtask prompt
+3. Use parallel batch execution: Up to 3 SubAgents per batch; start the next batch only after the current batch completes
+
+**Parameters to populate for each subtask**:
+
+#### Task Requirements
+1. Use the read tool to read project analysis results
+2. Deeply analyze relevant code files to understand implementation details
+3. Generate technical documentation based on document information and section requirements
+4. Ensure documents include code examples, architecture diagrams, and implementation details
+5. Document length and depth should adapt to project complexity
+
+#### Input Parameters (extracted from catalogue.json)
+- Document title: {title extracted from catalogue.json}
+- Document description: {prompt extracted from catalogue.json}
+- Document sections: {sections extracted from catalogue.json}
+- Project analysis results: `.costrict/wiki/.staging/basic_analyze.json`
+
+#### Execution Instructions
+- Each document corresponds to an independent `task` tool call (subagent_type: "WikiDocumentGenerate")
+- **Parallel Batch Execution**: Up to 3 SubAgents per batch; invoke the `task` tool multiple times in a single message to achieve parallelism; start the next batch only after the current batch completes
+- After all subtasks complete, proceed to Task 5
+
+### Subtask 4.1: Document Generation-1
+    ...
+
+... (Dynamically created document generation subtasks)
+
+### Subtask 4.N: Document Generation-N
+    ...
+
+#### Notes
+- Documents must be based on actual code analysis; do not speculate
+- Use relative paths when referencing code files
+
+### Subtask 5: Index File Generation
+**AgentName**: `WikiIndexGeneration`
+
+**Objective**: Create an index file for the generated technical documents to facilitate navigation and discovery
+
+#### Task Requirements
+1. Use the list tool to list all `.md` files in the `.costrict/wiki/` directory
+2. Use the read tool to read each document's title and summary information
+3. Extract project overview information (project positioning, technology stack, architectural characteristics)
+4. Generate a structured index file
+
+#### Notes
+- Document links should use relative path format `.costrict/wiki/{filename}`
+- Keep index document length within 100 lines
+- Keep summary information within 30 words
+
+## Completion Criteria
+
+Task execution is complete when all the following conditions are met:
+1. All subtasks have been executed sequentially and completed
+2. Project analysis result file has been generated (`.costrict/wiki/.staging/basic_analyze.json`)
+3. Documentation structure definition file has been generated (`.costrict/wiki/.staging/catalogue.json`)
+4. All technical documents have been generated based on the documentation structure definition (`.costrict/wiki/*.md`)
+5. Index file has been generated (`.costrict/wiki/index.md`)
+6. All file content is complete, format is correct, and quality meets requirements
+
+## Notes
+
+1. **Subtask Invocation**: Unless specifically noted to execute in the parent agent, all subtasks should be delegated to corresponding sub-agents using the `task` tool, referencing the "Subtask Prompt Template" above to populate parameters
+2. **Dynamic Subtask Parallel Execution**: Note that Task 4 requires dynamically creating N subtasks (where N = number of documents), with each subtask responsible for generating one document. Use parallel batch execution with up to 3 WikiDocumentGenerate SubAgents per batch, invoking the `task` tool multiple times in a single message to achieve parallelism
+3. **Sequential Execution**: Except for Task 4, all other subtasks must strictly execute sequentially in order; do not skip or parallelize
+4. **Completion Confirmation**: After each subtask completes, confirm the output file exists and format is correct before proceeding to the next
+5. **Output Language**: If the user does not specify, the default output language should be **English**
+6. **Error Handling**: If errors occur during document generation, record the error information and attempt to continue execution
+
+Now, please begin executing tasks according to the **Execution Steps**, deeply analyze the project root directory, and ultimately generate a complete, high-quality project technical documentation suite.

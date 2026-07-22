@@ -1,0 +1,442 @@
+# Deep Code Repository Analysis and AGENTS.md Generation
+
+## Task Objective
+You are a technical documentation expert specializing in code analysis, architecture decomposition, and technical writing.
+Your task is to deeply analyze the core content of this codebase (including directory structure, code files, configuration files, test cases, commit history, existing documentation, etc.) and generate a high-quality, comprehensive AGENTS.md file.
+This file is designed for AI Coding Agents operating within this repository, with core objectives to:
+1. Serve as the "single source of truth" for Agents handling repository-related tasks, providing precise understanding of design philosophy, implementation details, and maintenance standards;
+2. Ensure Agent outputs (code/solutions) fully align with the repository's architecture design, technical style, and business logic, avoiding conflicts with existing code;
+3. Enable Agents to efficiently complete design, coding, debugging, refactoring, and other core software engineering tasks.
+
+## User Input
+User Input: $ARGUMENTS
+
+Note: If not provided, ignore. If provided, **user input** must be followed, with user input taking precedence in case of conflicts.
+
+## Output File
+
+${path}/AGENTS.md
+
+## Execution Steps
+
+### Execution Guidelines
+1. Task Execution Standards
+   - Subtask Delegation: Use the `task` tool to delegate subtasks to subagents, avoiding context accumulation and improving execution efficiency;
+   - Sequential Execution Principle: All subtasks must be executed sequentially, completing and validating one before starting the next to ensure seamless task continuity;
+   - Parallel Tool Invocation: Read-only operations (e.g., file reading, git history retrieval) can be executed in parallel (up to 10 tool calls per message) for efficiency.
+
+2. File Operation Constraints (Strictly Enforced)
+   - Subagent Write Operations: Each subagent writes directly to the AGENTS.md file; do not return large amounts of redundant content to the parent agent;
+   - Directory Exclusion: Skip common hidden/irrelevant directories including but not limited to .vscode, node_modules, dist, vendor, build, etc.;
+   - Single Editable File: Only the AGENTS.md file may be edited throughout the process; do not modify any other files or directories;
+   - Path Convention: All file references must use relative paths from the project root in the format [relative_file_path:line_number]; absolute paths are prohibited.
+
+3. Subtask Context and Quality Requirements
+   - Context Transfer: Input to subagents must be complete and precise, containing all key information needed to complete the task without requiring additional clarification;
+   - Core Principles: All subtask execution must follow "evidence-based, concise and efficient, quality-first" principles; conclusions must be based on real project information—no speculation or fabrication;
+   - Incremental Updates: Subagents only update relevant sections of AGENTS.md, avoiding redundant output of existing compliant content.
+
+4. Subtask Template
+```json
+{
+  "subagent_type": "general",
+  "description": "{Brief task description}",
+  "prompt": "
+    **{Subtask Name}**
+    ## Task Objective
+      {Clear, concise core objective of the subtask, aligned with overall project guide generation requirements}
+    ## Task Instructions
+      {Detailed execution steps for the task, corresponding to the **Task Instructions** section of specific subtasks defined below}
+    ## Core Principles
+      1. Evidence-Based: Learn from real code; all conclusions must be based on actual project information (directories, files, code, commit history, etc.)—no speculation or fabrication.
+      2. Be Concise: Output only key information and reference locations; avoid repetition, redundancy, and large code snippets.
+      3. **Parallel Tool Invocation**: Execute read-only operations (e.g., reads, searches) in parallel (up to 10 tool calls per message) for efficiency.
+      4. Path References: Reference files using relative paths in the format [relative_file_path:line_number]. Use paths relative to the project root, not absolute paths.
+      5. Incremental Updates: Only update sections of AGENTS.md relevant to the task; do not re-output existing content.
+      6. Single Editable File: The only file you may edit is AGENTS.md; do not modify other files or sections unrelated to this task.
+      7. **Format Compliance**: Strictly follow the output format; do not add extra information or unrelated content, and do not modify the output format.
+      8. Quality First: Focus on content valuable to AI Coding that helps AI understand the project; avoid generalities and prioritize core information.
+      9. Language Preference: If not specified by the user, output language should be **English**.
+      10. {Additional notes: specific to each subtask's **Notes** section}
+    ## User Input (Skip if not applicable)
+      User Input: $ARGUMENTS
+      Note: If not provided, ignore. If provided, **user input** must be followed, with user input taking precedence in case of conflicts.
+    ## Output Requirements
+      - Output Path: AGENTS.md
+      - Output Example:
+      ```
+      {Output example and format for this subtask, aligned with the **Output Example** sections of specific subtasks}
+      ```
+  "
+}
+```
+Note: All `{}` placeholders in the template must be replaced with actual content. Sections without corresponding content (e.g., input parameters) should be removed entirely—do not retain placeholders or empty sections. JSON format must be strictly valid without syntax errors.
+
+
+### Subtask 1: Project Basic Information and Tech Stack Acquisition
+#### Task Instructions (In Execution Order)
+  1. Read existing AGENTS.md file (if any) to understand current state.
+  2. Analyze the project to obtain the following information:
+    - Project Name (from git or directory name)
+    - Project Description (extracted from README or code comments, including background, objectives, features, core modules, within 100 words)
+    - Project Scale (Small/Medium/Large/Extra Large, estimate approximate number of code files)
+    - Primary Language (main programming language)
+    - Overall Architecture (Monolithic/Microservices/Distributed/SOA/Microkernel, etc.)
+    - Tech Stack and Versions (identified from dependency files: frontend frameworks, backend tech stack, databases, message queues, middleware, toolchains, etc.)
+  3. Get current branch, latest git commit id (if available), and current timestamp.
+  4. Ensure AGENTS.md file exists; create if not.
+  5. Output content to AGENTS.md file according to the example and format requirements.
+
+#### Output Example
+```
+## Project Overview
+### Basic Information
+- Project Name: opencode
+- Project Description: Addressing the lack of integrated AI coding assistance tools for developers, this project aims to improve coding efficiency by providing CLI interaction, multi-LLM integration, and code read/write/edit capabilities. The core module is Agent intelligent scheduling and tool system, supporting local/cloud deployment.
+- Project Scale: Medium (350+ code files)
+- Primary Language: Backend Python 3.10 + Frontend TypeScript
+- Overall Architecture: Microkernel + Plugin-based
+- Branch: main
+- Commit: `a1b2c3d4e5f67890abcdef1234567890abcdef12`
+- Generated At: 2026-01-23 15:30:45
+
+### Tech Stack
+
+**Frontend**:
+- React 18.2 + TypeScript 5.2
+- Zustand 4.4
+
+**Backend**:
+- Bun 1.0
+- Fastify 4.25
+
+**Database/Middleware**:
+- Redis 7.2
+- SQLite 3.44
+- RabbitMQ 3.12
+
+**Toolchain**:
+- Package Manager: pnpm 8.15
+- Code Quality: ESLint 8.56 + Prettier 3.2
+- Build Tools: tsup 8.0 + rollup 4.9
+- Testing Framework: Jest 29.7 + Vitest 1.2
+```
+
+### Subtask 2: Project Structure Analysis
+#### Task Instructions (In Execution Order)
+  1. Read existing AGENTS.md file to understand current state.
+  2. Quickly analyze the project to identify:
+    - Key directory structure tree (skip common ignored directories)
+    - Core modules
+    - Common/shared modules
+  3. Analyze the project's Git commit history for the last 6 months:
+    - Extract only file modification records (no specific changes needed), excluding invalid records from ignored directories/logs/auto-generated files
+    - Aggregate modification records by directory hierarchy
+    - Count directory modification frequency
+    - Sort by "directory modification count" in descending order
+    - Identify high-frequency modification directories (top 30% by modification count OR directories associated with core modules, whichever is met first)
+  4. Filter and display directories/files according to the following rules (Core Objective: Maximize coverage of high-priority items within 150 lines):
+    ① Priority Ranking (High to Low):
+        - All directories and key files at root level
+        - High-frequency modified directories in the last 6 months
+        - Directories corresponding to core modules
+        - Directories corresponding to common/shared modules
+        - Project entry files, global config files, key documentation, common scripts
+        - High-frequency modified code files in the last 6 months
+        - Key code files under core modules
+        - Key code files under common modules
+        - Other non-core directories
+        - Other non-core files
+    ② Line Allocation Strategy:
+        - Prioritize allocating lines to high-priority items; after fully displaying high-priority items, use remaining lines for next-highest priority items;
+        - Within the same priority level, prioritize items that "cover core business/high-frequency modifications/high reusability", including as many same-priority items as possible;
+        - Continue until lines are exhausted (approaching 150 lines) or no more high-priority items remain, avoiding wasted lines.
+  5. Write descriptions for filtered directories/files:
+    - Read 2-3 core files within the directory to analyze their core functionality, technical positioning, and use cases;
+    - Descriptions must directly guide AI Coding behavior: enable AI to quickly locate development scenarios for the directory/file, precisely understand its core functionality, technical boundaries, and role in the project without additional inference.
+  6. Output the final **Directory Structure Tree** to the relevant section of AGENTS.md file (create section if not present).
+
+#### Notes:
+##### Traversal Rules
+- Core Traversal Priority: **Directories take precedence over files; breadth-first over depth-first**:
+  ① Breadth-First Traversal: Fully display outer directory structure first, then progressively extend inward, avoiding over-digging into a single level;
+  ② Directory-First Display: Prioritize complete presentation of directory hierarchy, then use remaining lines to supplement core files within directories, without missing high-priority directories.
+- Use "breadth-first" traversal, progressing from outer to inner directories layer by layer, selectively displaying based on priority;
+- Skip common hidden directories/files: .vscode, .git, node_modules, vendor, dist, build, etc.;
+
+##### Format Constraints
+- **Strictly use standard tree structure format**: Must use tree symbols like `├─`, `└─`, `│`; Markdown list symbols (`-`, `*`, etc.) are prohibited;
+- **Must be wrapped in code blocks**: The entire directory tree must be in ``` code blocks without any language identifier;
+- Final output directory structure tree must be ≤150 lines (aim close to 150 lines to maximize high-priority directory coverage);
+- Each directory/file comment must be ≤30 characters and **must include "core functionality + development positioning"**, avoiding generic descriptions (e.g., just "business logic"), providing index/navigation value to help AI quickly locate and understand purpose;
+- Small projects display to file level; medium-to-large projects selectively display to "directory + core files" level based on priority.
+- Final output contains only project directory structure and comment descriptions, no other irrelevant information or redundant content.
+
+##### Folding Rules
+- Folding is only for: freeing up lines to include more high-priority items, or simplifying low-priority items when approaching line limits;
+- Non-critical directories/files are uniformly folded with `...`, with a brief explanation (≤30 characters) after folding, specifying the type and functionality of folded content;
+- Folding Priority: Fold low-priority items first → Within same priority, fold "non-core/low-frequency modification" items → Finally fold "deep-level non-core files";
+- Folding Prerequisite: Ensure high-priority items at the same level are fully displayed before folding, avoiding wasting lines through premature folding.
+
+#### Output Example
+```
+## Project Structure
+\`\`\`
+prject_root_name/
+├─ bin/                # CLI executables: Entry directory for command-line interaction
+│  └─ cli              # CLI startup script: Parses user input, links to CLI command entry
+├─ script/             # Build scripts
+│  ├─ build.ts         # Build script: TS compilation, artifact packaging, links to project build process
+│  └─ ...              # Other build helper scripts: dependency installation, version validation, etc.
+├─ src/                # Core source code
+│  ├─ cli/             # CLI layer: Command-line argument parsing, interaction logic implementation
+│  │  └─ cmd/          # Command definitions: All CLI subcommand implementations
+│  │     ├─ run.ts     # Run command: AI session start, execution, termination, retry logic
+│  │     ├─ tui/       # TUI interface: Terminal visual interaction components, links to real-time session display
+│  │     └─ ...        # Other CLI commands: serve(service start)/web(web client)/auth(authentication), etc.
+│  ├─ session/         # Session core: Message management, state persistence, prompt generation
+│  │  ├─ prompt.ts     # Prompt templates: Dynamic AI prompt generation, links to template rendering logic
+│  │  └─ ...           # Session compression, retry, summary: Optimize session context/error tolerance
+│  ├─ server/          # HTTP server: API interface service, TUI frontend service implementation
+│  │  ├─ server.ts     # Server main entry: Defines API routes, links to HTTP service startup
+│  ├─ storage/         # Storage layer: Session/config/permission data persistence (local/database)
+│  ├─ util/            # util(utilities)/bus(event bus)/global(global state) common modules
+│  └─ ...              # Permission system: Role-based access control, manages tool/API permissions
+├─ test/               # Test cases: Unit/integration tests for CLI/Agent/tool system
+├─ package.json        # Dependency configuration
+├─ tsconfig.json       # TypeScript configuration
+└─ bunfig.toml         # Bun configuration
+\`\`\`
+```
+
+
+### Subtask 3: Project Standards Mining and Common Commands
+#### Task Instructions (In Execution Order)
+  1. Read existing AGENTS.md file to understand current state.
+  2. Deep Analysis (Core Standards Mining):
+  Based on core materials in AGENTS.md, analyze and extract potential project standards across these dimensions, specifying "constraint rules + implementation requirements":
+    - Code Placement Rules: Specify directory locations for different code types (business/utilities/config/tests)
+    - Module Division and Dependency Relationships: Specify module splitting standards, allowed/prohibited dependency directions between modules
+    - Data Flow and State Management: Specify data flow paths, state storage locations, update rules
+    - Naming Conventions: Cover files/functions/classes/methods/variables, specifying naming format, case, prefix/suffix rules
+    - Logging/Exception/Error Handling/API Response Standards:
+      - Logging/Exception/Error Handling: Processing workflow, output format, storage location, invocation methods
+      - API Standards: HTTP status codes, business response codes, unified response format usage/encoding/structure rules
+    - Common Libraries and Utility Functions: Specify use cases, core file paths (no code examples needed)
+    - Configuration File Management Standards: Specify configuration classification, storage paths, modification rules, environment isolation methods
+    - Testing Standards: Specify testing frameworks, test file organization, core test code writing patterns
+    - Project Common Commands: Filter high-frequency commands for build/test/start/deploy, annotate command purpose
+  3. Git Commit History Supplementary Analysis:
+    - Analyze project's last 3 months of Git commit history, extracting "real coding practices" from high-frequency modification records (must be: practical, actionable, and binding);
+    - Supplement Git-derived coding practices into corresponding standard dimensions, prioritizing core standard dimensions.
+  4. Standards Summary (Core Optimization: Focus on High Value, Strictly Control Item Count):
+    - Core Principle: Quality First. Prioritize coding standards, **extracting high-value rules with high-frequency guidance value for AI Coding, directly related to core code development, capable of preventing coding errors, and unifying development standards**—avoiding redundant, low-frequency, and practically meaningless rules;
+    - Item and Word Count Constraints: Total items strictly ≤50, each item ≤50 characters, concise and refined with strong binding (must use words like "must/prohibited/should"), no vague statements;
+    - Filtering and Simplification Rules:
+      1. Keep: Rules frequently used in AI Coding, directly guiding coding operations, related to core business code, preventing coding pitfalls;
+      2. Remove: Redundant rules, low-frequency rules that don't affect coding standards, rules unrelated to AI Coding (e.g., documentation format trivialities), overly trivial rules without practical binding value;
+      3. Exceeding Item Count: If initial summary exceeds 50 items, prioritize removing low-value rules, and within same priority level, remove duplicate/redundant items, ensuring final count ≤50 while retaining all high-value rules;
+  5. Strictly follow "Output Format" to update standards and common commands to AGENTS.md file.
+
+#### Notes
+  1. Analysis Constraints
+  - Analyze ≥30 core code files, prioritizing core module files, common module files, and files in high-frequency modification directories from git history;
+  - Analysis scope must cover: core code, common code, config files, scripts, test code, documentation, and high-frequency modified content from the last 3 months of git commits;
+  - Git analysis only extracts "practically valuable coding practices" (excluding non-binding changes like formatting adjustments, comment modifications).
+  
+  2. Standards Constraints
+  - Total items ≤50, each item ≤50 characters, no redundant statements (e.g., instead of "try to name properly", write "variables must use lowercase_underscore naming, camelCase prohibited");
+  - Reference file path format: `[src/utils/logger.ts:25]` (include line number if available, otherwise just path), do not expand specific code content;
+  - Standards must be "executable", clearly specifying "what to do/prohibited actions/how to do it", avoiding vague statements.
+  
+  3. Common commands should filter those frequently used in actual project development, no need to list all commands, annotate command purpose for understanding.
+  
+  4. All output must control redundancy, strictly follow word and item count limits, ensuring AGENTS.md file is concise and practical.
+
+#### Output Example
+````
+## Development Standards
+
+### Code Placement Standards
+- Business code must be placed in src/service/, utility code in src/utils/, mixing prohibited
+- Configuration files unified in src/config/, test code alongside source code named [filename].test.ts
+
+### Naming Conventions
+- File Naming: lowercase-hyphenated, e.g., user-service.ts, type files with .d.ts suffix
+- Functions/Methods: camelCase, verb-starting, e.g., getUserInfo
+- Class Names: PascalCase, noun-starting, e.g., UserService
+- Variables: camelCase, semantically clear, e.g., userList not data1/data2
+- Constants: UPPER_SNAKE_CASE, e.g., MAX_RETRY_COUNT, declared as const
+
+### Logging Standards
+- Must reuse src/utils/logger.ts for logging, direct console output prohibited, reference [src/utils/logger.ts:15]
+- Logs must be called by level (logger.error/info/debug), error codes defined in [src/constants/error.ts]
+- Must use log.New("service-name") to create log objects, reference [src/core/auth.ts:28]
+
+### Exception/Error Handling
+- Error codes must be defined in src/constants/error.ts, format is 6 digits, e.g., 100001
+- Async errors must be caught and processed uniformly by src/utils/error-handler.ts, direct throwing prohibited
+
+### API Standards
+- Project APIs use HTTP protocol, following general RESTful design principles
+- Business response code format is [service_code_2digits][module_code_2digits][error_code_3digits], success code fixed as 000000, reference [src/constants/resp-code.ts]
+- All APIs must return {code: string, msg: string, data: any} format, paginated data includes list/total/page/size, reference [src/core/page.ts]
+
+### Common Libraries and Utility Functions
+- Prioritize reusing utility functions in src/utils/, e.g., parameter validation in [src/utils/validate.ts]
+- Third-party libraries must be wrapped in src/libs/, e.g., request library wrapped in [src/libs/axios.ts]
+- Utility function unit test files must be placed in src/utils/tests/ directory
+
+### Configuration File Management Standards
+- Environment config in src/config/env.ts, distinguishing dev/prod environments
+- Sensitive config read from src/config/secrets.ts, no hardcoding in business files
+- Module config split by functionality, e.g., database config in [src/config/database.ts]
+
+### Testing Standards
+- Unit test files alongside source code, named [filename].test.ts, e.g., user-service.test.ts
+- Integration tests unified in src/tests/integration/ directory
+- Test case data must be placed in src/tests/mocks/, inline hardcoding prohibited
+
+### Other Standards
+- {Standard content + reference code file link, each ≤50 characters, omit if not applicable}
+
+## Common Commands
+```
+bun run typecheck      # Type check
+bun run build          # Build project
+bun dev                # Start development server
+bun test               # Run tests
+```
+````
+
+
+### Task 4: Fixed Content Addition
+Note: This task executes in the parent agent, no need to delegate to subagents.
+#### Task Instructions
+  1. Read existing AGENTS.md file, review current content;
+  2. According to the final output format, add the fixed **Usage Instructions** at the beginning and **General Best Practices** at the end to the appropriate positions in AGENTS.md. If these sections already exist and are identical, do not add duplicates.
+
+
+### Task 5: Review and Validation
+Note: This task executes in the parent agent, no need to delegate to subagents.
+#### Task Instructions (In Priority Order)
+1. Preliminary Preparation:
+   - Read the final version of AGENTS.md file, fully reviewing the document's chapter structure, format standards, and content details (e.g., paths, line numbers, standard items);
+   - Retrieve all previous subtask output format requirements and content constraint rules (e.g., word/item count limits) as review baselines;
+2. Detailed Item-by-Item Review:
+   - Validate all items across the 4 dimensions of the "Review Checklist", recording all non-compliant items (including issue type, location, specific error);
+   - Review must cover all document content including text, format, paths, punctuation, indentation, line counts, etc., without omission;
+3. Precise Correction:
+   - For all non-compliant items, apply corrections following the "minimum change" principle:
+     - Missing Content: Add compliant core information, no unrelated content;
+     - Format Errors: Correct to standard format (e.g., code block syntax, path annotation format);
+     - Content Errors: Correct paths/line numbers/standard descriptions, ensuring consistency with actual project;
+     - Redundant Content: Remove unrelated/low-value content, retain core information;
+   - Mark all changes after correction for focused review during re-validation;
+4. Re-validation and Finalization:
+   - Perform another full review based on the checklist, confirming all non-compliant items are corrected, no new issues introduced, no logical conflicts;
+   - After re-validation passes, finalize the AGENTS.md file, keeping only the corrected complete content without recording review/correction processes.
+
+#### Review Checklist (Dimension-Item-Execution Requirements)
+##### 1. Document Completeness Review
+- Chapter Completeness: Validate all required chapters are present (Usage Instructions, Project Structure, Development Standards, Common Commands, General Best Practices), add if missing;
+- Content Completeness: Validate core sub-items of each chapter are complete (e.g., naming/API/testing sub-items under Development Standards), no key information missing.
+
+##### 2. Format Compliance Review
+- Hierarchy Compliance: Validate document chapter levels (##/###/####) match output format requirements, no level confusion or indentation errors;
+- Element Compliance: Validate code blocks, path annotations (`directory/filename`), tables, etc. are properly formatted, no syntax errors;
+- **Directory Tree Format Compliance**: Strictly validate directory tree format, must meet the following requirements, correct if non-compliant:
+  - Must use standard tree symbols (`├─`, `└─`, `│`), Markdown list symbols (`-`, `*`) prohibited;
+  - Must be in code blocks (triple backticks) without any language identifier;
+  - Tree structure hierarchy must be clear and correct, symbols used properly.
+- Constraint Compliance: Validate directory tree (≤150 lines), standard items (≤50 items), single standard item (≤50 characters) word/item count limits, simplify if exceeded.
+
+##### 3. Content Accuracy Review
+- Path/Line Number Accuracy: Validate all file paths and line numbers match actual project, correct if errors;
+- Content Authenticity: Validate no fabricated/speculative/incorrect content (e.g., fake paths, wrong standards), thoroughly correct if present;
+- Content Relevance: Validate no unrelated redundant content (e.g., irrelevant commands, redundant standards), precisely remove if present.
+
+##### 4. Guidance and Length Review
+- Guidance: Validate directory descriptions, development standards, and common commands have practical guidance value for AI Coding, otherwise optimize expression (e.g., strengthen binding, add implementation paths);
+- Length Compliance: Validate total document line count meets requirements, if exceeded prioritize removing redundant/low-value content while ensuring core information is preserved.
+
+#### Notes
+- Review Coverage: Must include all text, format, punctuation, indentation, paths, line numbers, line counts, etc. in the document, no blind spots;
+- Minimum Change Principle: Only correct non-compliant items, do not modify compliant core content, do not add unrelated information;
+- Re-validation Cannot Be Skipped: Must complete full secondary validation to ensure no new issues or logical conflicts after correction;
+- Output Requirements: Only output the final finalized AGENTS.md file, do not record review, correction processes, or change logs;
+
+
+
+## Complete Output Format
+
+AGENTS.md:
+```markdown
+# AI Coding Guide
+
+> **Important**: This guide is the core reference for all development tasks in this project, with mandatory binding force, and must be strictly followed throughout.
+---
+1. Section Usage Instructions
+- **Project Overview**: Read this section before starting any development task to understand basic project information, tech stack, and architectural boundaries
+- **Project Structure**: Establish a global understanding and navigation index of the project; use the directory tree to quickly locate files and related code when receiving requirements; place new code files in appropriate directories according to standards
+- **Development Standards**: This is your core reference throughout the coding process; all coding behaviors including naming, APIs, logging/exception handling must strictly follow these requirements
+- **Common Commands**: When executing build, test, or deploy operations, prioritize using the high-frequency commands listed in this section
+- **General Best Practices**: Core guidelines for design, coding, and code delivery self-checks; verify each item before delivery to ensure code meets relevant principles
+2. Clause Effectiveness:
+    - Core constraint clauses (marked "must/prohibited") must be executed unconditionally without explicit user waiver; no modification, circumvention, or violation allowed;
+    - Guideline recommendation clauses (marked "should/recommended") should be prioritized for reference, with flexible adjustment based on actual development scenarios.
+---
+
+## Project Overview
+
+### Basic Information
+- Project Name: {project_name}
+- Project Description: {project_background_and_features}
+- Project Scale: {project_scale, estimated_code_file_count}
+- Primary Language: {main_development_language}
+- Overall Architecture: {overall_architecture}
+- Branch: {current_branch}
+- Commit: {current_commit}
+- Generated At: {document_generation_timestamp}
+
+### Tech Stack
+
+{frontend_frameworks, backend_tech_stack, databases, middleware, toolchains, etc. with versions}
+
+## Project Structure
+
+{directory_structure_tree_and_description}
+
+## Development Standards
+### xxx Standards
+- {directory_structure_organization, naming_conventions, logging_standards, error_handling_standards, etc.}
+
+## Common Commands
+```bash
+{build, test, and related commands}
+```
+
+## General Best Practices
+- Coding and design must strictly follow these core principles:
+  - KISS Principle: Code logic should be simple, no redundant implementations;
+  - DRY Principle: Reuse similar logic, no duplicate coding;
+  - Single Responsibility Principle: Classes/functions should only handle one core responsibility;
+  - Single Source of Truth Principle: Same business data should only be obtained from one trusted source, ensuring consistency;
+  - Minimum Change Principle: Only modify necessary code to meet requirements, no unrelated refactoring;
+- Prioritize reusing/leveraging existing project utility classes, business logic, and similar implementation mechanisms, do not reinvent the wheel;
+- Prohibit over-engineering: Only implement clearly defined features, do not add extension code without business justification;
+- Complete full self-check before code delivery: Ensure no syntax, path, or dependency errors, and compliance with all checklist constraints.
+```
+
+Note:
+1. Placeholders {xxx} in output examples should be replaced with actual content, or ignored if not applicable.
+2. Content in [xxx] in output examples is guidance information for reference only; do not include in actual output.
+3. Examples are standard templates; display granularity can be flexibly adjusted based on actual project scale (small/medium-large), with the core being to meet "line count limits, constraint requirements, format standards".
+
+---
+
+## Notes
+1. Unless otherwise specified for execution in the parent agent, all subtasks default to being delegated to SubAgent (type='general') using the `task` tool.
+2. If not specified by the user, the default output language should be **English**.
+
+Now, please begin executing tasks one by one according to the **Execution Steps** definition, deeply and comprehensively analyzing this code repository, and finally generate an AGENTS.md file that meets the requirements.

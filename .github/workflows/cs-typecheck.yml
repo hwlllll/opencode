@@ -1,0 +1,32 @@
+name: typecheck
+
+on:
+  push:
+    branches: [dev]
+  pull_request:
+    branches: [dev]
+  workflow_dispatch:
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.MY_SSH_PRIVATE_KEY }}
+
+      - name: Setup Bun
+        uses: ./.github/actions/setup-bun
+
+      - name: Generate builtin agents
+        run: bun run --cwd packages/opencode build:builtin-agents
+
+      - name: Generate builtin review agents
+        run: bun run --cwd packages/opencode build:builtin-review
+
+      - name: Run typecheck
+        run: bun typecheck

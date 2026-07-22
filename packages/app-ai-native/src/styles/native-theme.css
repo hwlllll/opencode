@@ -1,0 +1,473 @@
+@import "tw-animate-css";
+
+:root,
+[data-color-scheme="light"] {
+  --background: 0 0% 100%;
+  --foreground: 240 10% 3.9%;
+  --muted: 240 4.8% 95.9%;
+  --muted-foreground: 240 3.8% 46.1%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 10% 3.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 3.9%;
+  --border: 240 5.9% 90%;
+  --input: 240 5.9% 90%;
+  --primary: 240 5.9% 10%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 240 4.8% 95.9%;
+  --secondary-foreground: 240 5.9% 10%;
+  --accent: 240 4.8% 95.9%;
+  --accent-foreground: 240 5.9% 10%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --info: 204 94% 94%;
+  --info-foreground: 199 89% 48%;
+  --success: 149 80% 90%;
+  --success-foreground: 160 84% 39%;
+  --warning: 48 96% 89%;
+  --warning-foreground: 25 95% 53%;
+  --error: 0 93% 94%;
+  --error-foreground: 0 84% 60%;
+  --ring: 240 5.9% 10%;
+  --radius: 0.5rem;
+
+  --sidebar-background: 0 0% 98%;
+  --sidebar-foreground: 240 5.3% 26.1%;
+  --sidebar-primary: 240 5.9% 10%;
+  --sidebar-primary-foreground: 0 0% 98%;
+  --sidebar-accent: 240 4.8% 95.9%;
+  --sidebar-accent-foreground: 240 5.9% 10%;
+  --sidebar-border: 220 13% 91%;
+  --sidebar-ring: 217.2 91.2% 59.8%;
+
+  --native-font-display: "Aptos Display", "Segoe UI Variable Display", "SF Pro Display", "Helvetica Neue", sans-serif;
+  --native-font-body: "Aptos", "Segoe UI Variable Text", "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
+  --native-font-mono: var(--font-family-mono, "Cascadia Mono", "SF Mono", "Consolas", monospace);
+
+  --native-bg: oklch(98.2% 0.007 255);
+  --native-bg-subtle: oklch(96.8% 0.01 255);
+  --native-surface: oklch(95.2% 0.013 255);
+  --native-surface-strong: oklch(92.7% 0.017 255);
+  --native-panel: oklch(99.3% 0.003 255);
+  --native-panel-soft: color-mix(in oklab, var(--native-panel) 90%, var(--native-bg-subtle));
+  --native-foreground: oklch(27.4% 0.031 258);
+  --native-muted: oklch(44.9% 0.018 255);
+  --native-dim: oklch(59.6% 0.014 255);
+  --native-border: oklch(82.8% 0.014 255);
+  --native-border-strong: oklch(65.5% 0.022 256);
+  --native-input: oklch(99.7% 0.002 255);
+  --native-primary: #0053dc;
+  --native-primary-hover: #0045b9;
+  --native-primary-soft: color-mix(in oklab, var(--native-primary) 11%, var(--native-panel));
+  --native-primary-muted: oklch(33.2% 0.073 260);
+  --native-primary-foreground: oklch(99.1% 0.003 255);
+  --native-secondary: color-mix(in oklab, var(--native-primary) 8%, var(--native-surface));
+  --native-secondary-foreground: oklch(35.3% 0.041 258);
+  --native-success: oklch(58.1% 0.129 160);
+  --native-success-soft: oklch(95.5% 0.035 163);
+  --native-success-foreground: oklch(36.7% 0.061 165);
+  --native-warning: oklch(71.8% 0.149 71);
+  --native-warning-soft: oklch(96.4% 0.038 80);
+  --native-warning-foreground: oklch(46.4% 0.085 62);
+  --native-error: oklch(60.8% 0.203 25);
+  --native-error-soft: oklch(96.1% 0.032 20);
+  --native-error-foreground: oklch(41.3% 0.105 25);
+  --native-info: oklch(64.2% 0.127 248);
+  --native-info-soft: oklch(95.9% 0.025 248);
+  --native-info-foreground: oklch(39.8% 0.064 248);
+  --native-ring: var(--native-primary);
+  --native-hover: color-mix(in oklab, var(--native-primary) 6%, transparent);
+  --native-active: color-mix(in oklab, var(--native-primary) 12%, transparent);
+  --native-overlay: color-mix(in oklab, var(--native-foreground) 18%, transparent);
+  --native-disabled-opacity: 0.45;
+  --native-radius-sm: 0.625rem;
+  --native-radius-md: 0.875rem;
+  --native-radius-lg: 1.125rem;
+  --native-radius-xl: 1.5rem;
+  --native-radius-full: 9999px;
+  --native-sidebar-width: 17.5rem;
+  --native-shadow-sm: 0 10px 24px -20px color-mix(in oklab, var(--native-foreground) 14%, transparent);
+  --native-shadow-md: 0 18px 50px -28px color-mix(in oklab, var(--native-foreground) 20%, transparent), 0 10px 22px -18px color-mix(in oklab, var(--native-primary) 10%, transparent);
+  --native-shadow-lg: 0 32px 80px -34px color-mix(in oklab, var(--native-foreground) 22%, transparent), 0 16px 34px -22px color-mix(in oklab, var(--native-primary) 14%, transparent);
+  --native-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --native-transition-normal: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dark,
+[data-kb-theme="dark"],
+[data-color-scheme="dark"] {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --primary: 0 0% 98%;
+  --primary-foreground: 240 5.9% 10%;
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --info: 204 94% 94%;
+  --info-foreground: 199 89% 48%;
+  --success: 149 80% 90%;
+  --success-foreground: 160 84% 39%;
+  --warning: 48 96% 89%;
+  --warning-foreground: 25 95% 53%;
+  --error: 0 93% 94%;
+  --error-foreground: 0 84% 60%;
+  --ring: 240 4.9% 83.9%;
+
+  --sidebar-background: 240 5.9% 10%;
+  --sidebar-foreground: 240 4.8% 95.9%;
+  --sidebar-primary: 224.3 76.3% 48%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 240 3.7% 15.9%;
+  --sidebar-accent-foreground: 240 4.8% 95.9%;
+  --sidebar-border: 240 3.7% 15.9%;
+  --sidebar-ring: 217.2 91.2% 59.8%;
+
+  --native-bg: oklch(18.3% 0.017 258);
+  --native-bg-subtle: oklch(21.2% 0.016 258);
+  --native-surface: oklch(24.8% 0.017 258);
+  --native-surface-strong: oklch(29.4% 0.021 258);
+  --native-panel: oklch(16.2% 0.014 258);
+  --native-panel-soft: color-mix(in oklab, var(--native-panel) 88%, var(--native-bg-subtle));
+  --native-foreground: oklch(93.2% 0.009 255);
+  --native-muted: oklch(76.1% 0.011 255);
+  --native-dim: oklch(60.8% 0.011 255);
+  --native-border: oklch(35.8% 0.018 258);
+  --native-border-strong: oklch(53.8% 0.028 258);
+  --native-input: oklch(19.4% 0.015 258);
+  --native-primary: oklch(66.4% 0.202 260);
+  --native-primary-hover: oklch(72.4% 0.178 259);
+  --native-primary-soft: color-mix(in oklab, var(--native-primary) 20%, var(--native-panel));
+  --native-primary-muted: oklch(84.6% 0.067 257);
+  --native-primary-foreground: oklch(18.8% 0.015 258);
+  --native-secondary: color-mix(in oklab, var(--native-primary) 16%, var(--native-surface));
+  --native-secondary-foreground: oklch(86.9% 0.033 256);
+  --native-success: oklch(76.4% 0.146 161);
+  --native-success-soft: oklch(29.6% 0.065 164);
+  --native-success-foreground: oklch(93.6% 0.038 165);
+  --native-warning: oklch(82.7% 0.141 77);
+  --native-warning-soft: oklch(34.8% 0.074 72);
+  --native-warning-foreground: oklch(94.4% 0.038 82);
+  --native-error: oklch(78.4% 0.123 23);
+  --native-error-soft: oklch(31.2% 0.086 22);
+  --native-error-foreground: oklch(93.8% 0.026 16);
+  --native-info: oklch(76.8% 0.092 248);
+  --native-info-soft: oklch(31.5% 0.052 249);
+  --native-info-foreground: oklch(93.7% 0.024 249);
+  --native-ring: var(--native-primary);
+  --native-hover: color-mix(in oklab, white 8%, transparent);
+  --native-active: color-mix(in oklab, var(--native-primary) 18%, transparent);
+  --native-overlay: color-mix(in oklab, black 56%, transparent);
+  --native-shadow-sm: 0 10px 24px -18px color-mix(in oklab, black 34%, transparent);
+  --native-shadow-md: 0 22px 56px -28px color-mix(in oklab, black 40%, transparent), 0 12px 26px -20px color-mix(in oklab, var(--native-primary) 14%, transparent);
+  --native-shadow-lg: 0 34px 90px -38px color-mix(in oklab, black 46%, transparent), 0 18px 38px -22px color-mix(in oklab, var(--native-primary) 14%, transparent);
+}
+
+@theme inline {
+  --font-sans: var(--native-font-body);
+  --font-mono: var(--native-font-mono);
+  --color-background: var(--native-bg);
+  --color-foreground: var(--native-foreground);
+  --color-muted: var(--native-bg-subtle);
+  --color-muted-foreground: var(--native-muted);
+  --color-popover: var(--native-panel);
+  --color-popover-foreground: var(--native-foreground);
+  --color-card: var(--native-panel);
+  --color-card-foreground: var(--native-foreground);
+  --color-border: color-mix(in srgb, var(--native-border) 32%, var(--native-panel));
+  --color-input: color-mix(in srgb, var(--native-border) 58%, var(--native-panel));
+  --color-ring: var(--native-ring);
+  --color-primary: var(--native-primary);
+  --color-primary-foreground: var(--native-primary-foreground);
+  --color-secondary: var(--native-secondary);
+  --color-secondary-foreground: var(--native-secondary-foreground);
+  --color-accent: var(--native-surface);
+  --color-accent-foreground: var(--native-foreground);
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-info: hsl(var(--info));
+  --color-info-foreground: hsl(var(--info-foreground));
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
+  --color-error: hsl(var(--error));
+  --color-error-foreground: hsl(var(--error-foreground));
+  --color-sidebar: hsl(var(--sidebar-background));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+
+  --color-native-bg: var(--native-bg);
+  --color-native-bg-subtle: var(--native-bg-subtle);
+  --color-native-surface: var(--native-surface);
+  --color-native-surface-strong: var(--native-surface-strong);
+  --color-native-panel: var(--native-panel);
+  --color-native-panel-soft: var(--native-panel-soft);
+  --color-native-foreground: var(--native-foreground);
+  --color-native-muted: var(--native-muted);
+  --color-native-dim: var(--native-dim);
+  --color-native-border: var(--native-border);
+  --color-native-border-strong: var(--native-border-strong);
+  --color-native-primary: var(--native-primary);
+  --color-native-primary-hover: var(--native-primary-hover);
+  --color-native-primary-soft: var(--native-primary-soft);
+  --color-native-primary-muted: var(--native-primary-muted);
+  --color-native-primary-foreground: var(--native-primary-foreground);
+  --color-native-secondary: var(--native-secondary);
+  --color-native-secondary-foreground: var(--native-secondary-foreground);
+  --color-native-success: var(--native-success);
+  --color-native-success-soft: var(--native-success-soft);
+  --color-native-success-foreground: var(--native-success-foreground);
+  --color-native-warning: var(--native-warning);
+  --color-native-warning-soft: var(--native-warning-soft);
+  --color-native-warning-foreground: var(--native-warning-foreground);
+  --color-native-error: var(--native-error);
+  --color-native-error-soft: var(--native-error-soft);
+  --color-native-error-foreground: var(--native-error-foreground);
+  --color-native-info: var(--native-info);
+  --color-native-info-soft: var(--native-info-soft);
+  --color-native-info-foreground: var(--native-info-foreground);
+  --color-native-ring: var(--native-ring);
+  --color-native-hover: var(--native-hover);
+  --color-native-active: var(--native-active);
+  --color-native-overlay: var(--native-overlay);
+
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-native-sm: var(--native-radius-sm);
+  --radius-native-md: var(--native-radius-md);
+  --radius-native-lg: var(--native-radius-lg);
+  --radius-native-xl: var(--native-radius-xl);
+  --radius-native-full: var(--native-radius-full);
+
+  --shadow-native-sm: var(--native-shadow-sm);
+  --shadow-native-md: var(--native-shadow-md);
+  --shadow-native-lg: var(--native-shadow-lg);
+
+  --opacity-native-disabled: var(--native-disabled-opacity);
+  --transition-native-fast: var(--native-transition-fast);
+  --transition-native-normal: var(--native-transition-normal);
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-content-show: content-show 0.2s ease-out;
+  --animate-content-hide: content-hide 0.15s ease-in;
+  --animate-native-fade-in: native-fade-in 150ms ease-out;
+  --animate-native-scale-in: native-scale-in 150ms ease-out;
+}
+
+@layer base {
+  :root {
+    font-family: var(--native-font-body);
+    text-rendering: optimizeLegibility;
+    font-kerning: normal;
+  }
+
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    background: var(--color-background);
+  }
+
+  body {
+    background:
+      radial-gradient(circle at top, color-mix(in oklab, var(--native-primary) 7%, transparent) 0, transparent 34%),
+      linear-gradient(180deg, color-mix(in oklab, var(--native-panel) 34%, transparent), transparent 18%),
+      var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--native-font-body);
+    font-size: 0.9375rem;
+    line-height: 1.55;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--native-font-display);
+    color: var(--native-foreground);
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+
+  h1 {
+    letter-spacing: -0.045em;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--native-primary) 18%, transparent);
+    color: var(--native-foreground);
+  }
+}
+
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+
+  to {
+    height: var(--kb-accordion-content-height);
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--kb-accordion-content-height);
+  }
+
+  to {
+    height: 0;
+  }
+}
+
+@keyframes content-show {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes content-hide {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@keyframes native-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes native-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bell-ring {
+  0%, 100% { transform: rotate(0deg); }
+  10% { transform: rotate(14deg); }
+  20% { transform: rotate(-12deg); }
+  30% { transform: rotate(10deg); }
+  40% { transform: rotate(-8deg); }
+  50% { transform: rotate(4deg); }
+  60% { transform: rotate(0deg); }
+}
+
+.animate-bell {
+  animation: bell-ring 1.5s ease-in-out infinite;
+}
+
+@keyframes slideFromBottom {
+  from { transform: translateY(40px); opacity: 0.6; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideFromTop {
+  from { transform: translateY(-40px); opacity: 0.6; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.ws-enter,
+.ws-leave {
+  will-change: transform, opacity;
+}
+
+.ws-enter {
+  animation-duration: 360ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-fill-mode: forwards;
+}
+
+.ws-leave {
+  animation-duration: 360ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-fill-mode: forwards;
+  pointer-events: none;
+}
+
+.ws-enter-from-bottom {
+  animation-name: wsSlideInFromBottom;
+}
+
+.ws-enter-from-top {
+  animation-name: wsSlideInFromTop;
+}
+
+.ws-leave-to-top {
+  animation-name: wsSlideOutToTop;
+}
+
+.ws-leave-to-bottom {
+  animation-name: wsSlideOutToBottom;
+}
+
+@keyframes wsSlideInFromBottom {
+  from { transform: translateY(30%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes wsSlideInFromTop {
+  from { transform: translateY(-30%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes wsSlideOutToTop {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(-30%); opacity: 0; }
+}
+
+@keyframes wsSlideOutToBottom {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(30%); opacity: 0; }
+}

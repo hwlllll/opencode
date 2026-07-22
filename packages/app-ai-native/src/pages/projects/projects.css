@@ -1,0 +1,378 @@
+.projects-page {
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(1rem, 2vw, 2rem);
+  gap: 1.25rem;
+  overflow-x: clip;
+}
+
+.projects-page-header {
+  flex: 0 0 auto;
+}
+
+.projects-page-main {
+  min-height: 0;
+  min-width: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.projects-list-shell {
+  min-height: 0;
+  min-width: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.projects-top-panels {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 22rem;
+  gap: 1.25rem;
+}
+
+.projects-pinned-shell,
+.projects-invitations-shell {
+  min-width: 0;
+  min-height: 14rem;
+  border-radius: var(--native-radius-lg);
+  border: 1px solid color-mix(in oklab, var(--color-native-border) 28%, transparent);
+  background: color-mix(in oklab, var(--color-native-panel) 84%, var(--color-native-bg-subtle));
+  box-shadow: var(--native-shadow-sm);
+  padding: 1rem;
+}
+
+.projects-panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.875rem;
+}
+
+.projects-pinned-list {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 1rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+}
+
+.projects-pinned-card {
+  min-width: 16rem;
+  max-width: 18rem;
+  min-height: 10rem;
+  border-radius: var(--native-radius-md);
+  border: 1px solid color-mix(in oklab, var(--color-native-primary) 14%, transparent);
+  background: linear-gradient(160deg, color-mix(in oklab, var(--color-native-primary) 9%, var(--color-native-panel)), color-mix(in oklab, var(--color-native-panel) 82%, var(--color-native-bg-subtle)));
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  color: var(--color-native-foreground);
+  box-shadow: var(--native-shadow-sm);
+}
+
+.projects-pinned-card-actions {
+  margin-top: auto;
+  justify-content: flex-end;
+}
+
+.projects-pinned-card-title {
+  margin: 0;
+  font-family: var(--native-font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--color-native-foreground);
+}
+
+.projects-pinned-card-desc {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--color-native-muted);
+  line-height: 1.65;
+}
+
+.projects-pinned-card-meta {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--color-native-dim);
+}
+
+.projects-invitation-carousel,
+.projects-invitation-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 13rem;
+  overflow: auto;
+  padding-right: 0.25rem;
+}
+
+.projects-invitation-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-radius: var(--native-radius-md);
+  border: 1px solid color-mix(in oklab, var(--color-native-border) 28%, transparent);
+  padding: 0.5rem 0.75rem;
+  background: color-mix(in oklab, var(--color-native-panel) 76%, var(--color-native-bg-subtle));
+  min-height: 2.5rem;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 150ms ease, background-color 150ms ease, transform 150ms ease;
+}
+
+.projects-invitation-item:hover {
+  border-color: color-mix(in oklab, var(--color-native-primary) 16%, transparent);
+  background: color-mix(in oklab, var(--color-native-primary) 4%, var(--color-native-panel));
+  transform: translateY(-1px);
+}
+
+.projects-invitation-item-main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.projects-invitation-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  flex: 0 0 auto;
+}
+
+.projects-invitation-item-actions button {
+  cursor: pointer;
+  transition: background-color 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.projects-invitation-item-actions button:hover {
+  background-color: color-mix(in oklab, var(--color-native-panel) 94%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-native-border) 24%, transparent);
+}
+
+.projects-invitation-item-title {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-native-foreground);
+}
+
+.projects-invitation-item-meta {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--color-native-dim);
+}
+
+.projects-invitation-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.projects-search-field {
+  width: 15rem;
+}
+
+.projects-table-shell {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: auto;
+}
+
+.project-detail-page {
+  gap: 1.25rem;
+}
+
+.project-detail-main {
+  gap: 1.25rem;
+}
+
+.project-detail-header-bar {
+  border-color: color-mix(in oklab, var(--color-native-border) 34%, transparent);
+}
+
+.project-detail-title {
+  max-width: 16ch;
+}
+
+.project-detail-content {
+  min-height: 0;
+}
+
+.project-detail-tab-panels {
+  min-height: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.project-detail-tab-panel {
+  height: 100%;
+  min-height: 0;
+}
+
+.project-detail-bound-repositories,
+.project-detail-activity-repo,
+.project-detail-tab-panel-members,
+.project-detail-tab-panel-invitations {
+  border-radius: var(--native-radius-lg);
+  border: 1px solid color-mix(in oklab, var(--color-native-border) 28%, transparent);
+  background: color-mix(in oklab, var(--color-native-panel) 84%, var(--color-native-bg-subtle));
+  box-shadow: var(--native-shadow-sm);
+}
+
+.project-detail-bound-repositories {
+  min-height: 0;
+  flex: 1 1 45%;
+  overflow: hidden;
+}
+
+.project-detail-tab-panel-members,
+.project-detail-tab-panel-invitations {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 1rem;
+}
+
+.project-detail-tab-panel-activity {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.project-detail-activity-list {
+  min-height: 0;
+}
+
+.project-detail-bound-repositories .project-detail-table,
+.project-detail-tab-panel-members .project-detail-table,
+.project-detail-tab-panel-invitations .project-detail-table {
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.project-detail-activity-repo {
+  flex: 0 0 auto;
+  min-height: 7.5rem;
+  height: 7.5rem;
+  background: color-mix(in oklab, var(--color-native-panel) 74%, var(--color-native-bg-subtle));
+  border: 1px solid color-mix(in oklab, var(--color-native-border) 24%, transparent);
+  box-shadow: var(--native-shadow-sm);
+}
+
+.project-detail-activity-repo-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr) 9.5rem;
+  align-items: center;
+  gap: 1rem;
+}
+
+.project-detail-activity-repo-info,
+.project-detail-activity-shared-users,
+.project-detail-activity-chart {
+  min-width: 0;
+}
+
+.project-detail-activity-repo-label {
+  margin-bottom: 0.375rem;
+}
+
+.project-detail-activity-shared-users-row {
+  display: flex;
+  align-items: center;
+}
+
+.project-detail-activity-user-avatar-wrap,
+.project-detail-activity-user-avatar-overflow {
+  margin-left: -0.375rem;
+}
+
+.project-detail-activity-user-avatar-wrap:first-child,
+.project-detail-activity-user-avatar-overflow:first-child {
+  margin-left: 0;
+}
+
+.project-detail-activity-user-avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  overflow: hidden;
+  border: 2px solid color-mix(in oklab, var(--color-native-panel) 96%, transparent);
+  background-color: color-mix(in oklab, var(--color-native-bg-subtle) 92%, transparent);
+}
+
+.project-detail-activity-user-avatar-overflow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-native-dim);
+}
+
+.project-detail-activity-chart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.project-detail-activity-sparkline {
+  width: 9rem;
+  height: 3rem;
+  overflow: visible;
+}
+
+.project-detail-activity-sparkline-line {
+  fill: none;
+  stroke: var(--color-native-primary);
+  stroke-width: 1.45;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+  .projects-page {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .project-detail-activity-repo-layout {
+    grid-template-columns: 1fr;
+    align-items: flex-start;
+  }
+
+  .project-detail-activity-chart {
+    align-items: flex-start;
+  }
+}
+
+.project-detail-table {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.project-detail-table-inner {
+  min-height: 100%;
+}
+
+@media (max-width: 1100px) {
+  .projects-top-panels {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,179 @@
+# CoStrict CLI GitHub Release Workflow
+#
+# This workflow automates the process of publishing CoStrict CLI binaries to GitHub Releases.
+#
+# Workflow Steps:
+# 1. Manual trigger with version input (e.g., "1.0.0")
+# 2. Create git tag (e.g., "1.0.0")
+# 3. Push tag to remote repository
+# 4. Initialize GitHub Release in draft state
+# 5. Build CLI binaries for multiple platforms
+# 6. Package binaries into archives (tar.gz for Linux, zip for others)
+# 7. Upload archives to GitHub Release
+# 8. Display build summary with download links
+
+name: publish-github
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release (e.g., 1.0.0)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  # Job 1: Create Tag and Initialize Release
+  # - Validates that the tag doesn't already exist
+  # - Creates and pushes the git tag
+  # - Initializes a draft GitHub Release
+  # - Outputs version info for subsequent jobs
+  version:
+    runs-on: ubuntu-latest
+    if: github.repository == 'zgsm-sangfor/opencode'
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup-bun
+
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.MY_SSH_PRIVATE_KEY }}
+
+      - name: Restore bundled skills cache
+        id: skills-cache-version
+        uses: actions/cache@v4
+        with:
+          path: packages/opencode/bundled-skills
+          key: bundled-skills-${{ runner.os }}-v1
+          restore-keys: |
+            bundled-skills-${{ runner.os }}-
+
+      - name: Generate builtin agents and skills
+        run: bun run --cwd packages/opencode build:builtin
+
+      - id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COSTRICT_VERSION: ${{ inputs.version }}
+        run: |
+          VERSION="${{ inputs.version }}"
+          TAG="${VERSION}"
+          REPO="${{ github.repository }}"
+
+          echo "Checking if tag ${TAG} already exists..."
+          if git tag -l | grep -q "^${TAG}$"; then
+            echo "❌ Tag ${TAG} already exists"
+            exit 1
+          fi
+
+          echo "Creating git tag ${TAG}..."
+          git tag "${TAG}"
+
+          echo "Pushing tag to remote..."
+          git push origin "${TAG}"
+
+          echo "Initializing GitHub Release ${TAG}..."
+          echo "No notable changes" | gh release create "${TAG}" -d --title "${TAG}" --repo "${REPO}" --notes-file -
+
+          RELEASE_ID=$(gh release view "${TAG}" --json databaseId --jq '.databaseId' --repo "${REPO}")
+
+          echo "✅ Tag ${TAG} created and release initialized"
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "release=${RELEASE_ID}" >> $GITHUB_OUTPUT
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "repo=${REPO}" >> $GITHUB_OUTPUT
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      release: ${{ steps.version.outputs.release }}
+      tag: ${{ steps.version.outputs.tag }}
+      repo: ${{ steps.version.outputs.repo }}
+
+  # Job 2: Build CLI Binaries and Upload to Release
+  # - Builds CLI binaries for multiple platforms (Linux, macOS, Windows)
+  # - Creates platform-specific archives
+  # - Uploads all archives to the GitHub Release
+  # - Generates build summary with download information
+  build-cli:
+    needs: version
+    runs-on: ubuntu-latest
+    if: github.repository == 'zgsm-sangfor/opencode'
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.MY_SSH_PRIVATE_KEY }}
+
+      - uses: ./.github/actions/setup-bun
+
+      - name: Restore bundled skills cache
+        id: skills-cache-build
+        uses: actions/cache@v4
+        with:
+          path: packages/opencode/bundled-skills
+          key: bundled-skills-${{ runner.os }}-v1
+          restore-keys: |
+            bundled-skills-${{ runner.os }}-
+
+      - name: Generate builtin agents and skills
+        run: bun run --cwd packages/opencode build:builtin
+
+      # Build CLI binaries using the build script
+      - name: Build
+        id: build
+        run: |
+          ./packages/opencode/script/build.ts
+        env:
+          COSTRICT_VERSION: ${{ needs.version.outputs.version }}
+          COSTRICT_RELEASE: ${{ needs.version.outputs.release }}
+          GH_REPO: ${{ needs.version.outputs.repo }}
+          GH_TOKEN: ${{ github.token }}
+
+      # Package binaries: tar.gz for Linux, zip for macOS/Windows
+      - name: Create archives for GitHub release
+        run: |
+          cd packages/opencode
+          for key in dist/@costrict/cs-*/; do
+            key=$(basename "$key")
+            if [[ "$key" == *"linux"* ]]; then
+              (cd "dist/@costrict/${key}/bin" && tar -czf "../../${key}.tar.gz" *)
+            else
+              (cd "dist/@costrict/${key}/bin" && zip -r "../../${key}.zip" *)
+            fi
+          done
+          ls -lh dist/@costrict/*.tar.gz dist/@costrict/*.zip
+
+      # Upload all archives to GitHub Release
+      - name: Upload to GitHub Release
+        if: ${{ needs.version.outputs.release != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ needs.version.outputs.repo }}
+        run: |
+          gh release upload ${{ needs.version.outputs.tag }} packages/opencode/dist/@costrict/*.zip packages/opencode/dist/@costrict/*.tar.gz --clobber --repo $GH_REPO
+
+      # Generate build summary with release information
+      - name: Build Summary
+        if: always()
+        run: |
+          echo "## 🎉 CoStrict CLI Published to GitHub" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Successfully built and uploaded CLI binaries to GitHub Release!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📦 Release Details" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version**: ${{ needs.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tag**: ${{ needs.version.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Repository**: ${{ needs.version.outputs.repo }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📥 Download" >> $GITHUB_STEP_SUMMARY
+          echo "Visit the [Release Page](https://github.com/${{ needs.version.outputs.repo }}/releases/tag/${{ needs.version.outputs.tag }}) to download the binaries." >> $GITHUB_STEP_SUMMARY
