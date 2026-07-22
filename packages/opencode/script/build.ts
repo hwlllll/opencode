@@ -65,6 +65,12 @@ const baselineFlag = process.argv.includes("--baseline")
 const skipInstall = process.argv.includes("--skip-install")
 const plugin = createSolidTransformPlugin()
 const skipEmbedWebUi = process.argv.includes("--skip-embed-web-ui")
+const pos = process.argv.indexOf("--target")
+const explicit = pos !== -1 || process.argv.some((arg) => arg.startsWith("--target="))
+const selected =
+  process.argv.find((arg) => arg.startsWith("--target="))?.slice("--target=".length) ??
+  (pos === -1 ? undefined : process.argv[pos + 1])
+const wanted = selected?.split(",").filter(Boolean)
 
 const createEmbeddedWebUIBundle = async () => {
   console.log(`Building Web UI to embed in the binary`)
@@ -154,26 +160,44 @@ const allTargets: {
   },
 ]
 
-const targets = singleFlag
-  ? allTargets.filter((item) => {
-      if (item.os !== process.platform || item.arch !== process.arch) {
-        return false
-      }
+const label = (item: (typeof allTargets)[number]) =>
+  [
+    item.os === "win32" ? "windows" : item.os,
+    item.arch,
+    item.avx2 === false ? "baseline" : undefined,
+    item.abi,
+  ]
+    .filter(Boolean)
+    .join("-")
 
-      // When building for the current platform, prefer a single native binary by default.
-      // Baseline binaries require additional Bun artifacts and can be flaky to download.
-      if (item.avx2 === false) {
-        return baselineFlag
-      }
+if (explicit && !wanted?.length) throw new Error("--target requires a value")
+const invalid = wanted?.find((target) => !allTargets.some((item) => label(item) === target))
+if (invalid) {
+  throw new Error(`Unsupported target '${invalid}'. Available targets: ${allTargets.map(label).join(", ")}`)
+}
 
-      // also skip abi-specific builds for the same reason
-      if (item.abi !== undefined) {
-        return false
-      }
+const targets = wanted
+  ? allTargets.filter((item) => wanted.includes(label(item)))
+  : singleFlag
+    ? allTargets.filter((item) => {
+        if (item.os !== process.platform || item.arch !== process.arch) {
+          return false
+        }
 
-      return true
-    })
-  : allTargets
+        // When building for the current platform, prefer a single native binary by default.
+        // Baseline binaries require additional Bun artifacts and can be flaky to download.
+        if (item.avx2 === false) {
+          return baselineFlag
+        }
+
+        // also skip abi-specific builds for the same reason
+        if (item.abi !== undefined) {
+          return false
+        }
+
+        return true
+      })
+    : allTargets
 
 await $`rm -rf dist`
 

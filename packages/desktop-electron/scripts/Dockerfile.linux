@@ -1,0 +1,12 @@
+FROM m.daocloud.io/docker.io/library/node:20-bookworm-slim
+
+RUN sed -i 's|http://deb.debian.org/debian-security|http://mirrors.aliyun.com/debian-security|g; s|http://deb.debian.org/debian|http://mirrors.aliyun.com/debian|g' /etc/apt/sources.list.d/debian.sources \
+  && apt-get update \
+  && apt-get install -y --no-install-recommends ca-certificates rpm xz-utils \
+  && rm -rf /var/lib/apt/lists/*
+
+RUN npm config set registry https://registry.npmmirror.com \
+  && npm install --global electron-builder@26.8.1
+
+WORKDIR /project
+ENTRYPOINT ["electron-builder"]

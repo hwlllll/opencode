@@ -282,7 +282,7 @@ export const InstanceRoutes = (app?: Hono) =>
         return "/"
       }
 
-      const path = normalizePath(rawPath)
+      const path = embeddedWebUI ? normalizePath(rawPath) : rawPath
 
       if (embeddedWebUI) {
         const cleanPath = path.replace(/^\//, "")
@@ -320,8 +320,9 @@ export const InstanceRoutes = (app?: Hono) =>
       } else {
         // Dev mode: proxy to local vite dev server
         const devServer = "http://localhost:3000"
+        const query = new URL(c.req.url).search
 
-        const response = await proxy(`${devServer}${path}`, {
+        const response = await proxy(`${devServer}${path}${query}`, {
           ...c.req,
           headers: {
             ...c.req.raw.headers,

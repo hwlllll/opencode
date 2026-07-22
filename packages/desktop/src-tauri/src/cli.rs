@@ -42,6 +42,7 @@ impl CommandWrapper for WinCreationFlags {
 
 const CLI_INSTALL_DIR: &str = ".opencode/bin";
 const CLI_BINARY_NAME: &str = "costrict-cli";
+const SHELL_ENV_TIMEOUT: Duration = Duration::from_secs(5);
 
 #[derive(serde::Deserialize, Debug)]
 pub struct ServerConfig {

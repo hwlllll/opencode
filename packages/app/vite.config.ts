@@ -8,6 +8,10 @@ export default defineConfig({
     host: "0.0.0.0",
     allowedHosts: true,
     port: 3000,
+    hmr: {
+      host: "localhost",
+      clientPort: 3000,
+    },
   },
   build: {
     target: "esnext",

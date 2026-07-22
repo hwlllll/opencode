@@ -40,6 +40,10 @@ const getBase = (): Configuration => ({
       filter: ["opencode-cli*"],
     },
     {
+      from: "resources/icons/",
+      to: "icons/",
+    },
+    {
       from: "native/",
       to: "native/",
       filter: ["index.js", "index.d.ts", "build/Release/mac_window.node", "swift-build/**"],
@@ -79,7 +83,8 @@ const getBase = (): Configuration => ({
   linux: {
     icon: `resources/icons`,
     category: "Development",
-    target: ["AppImage", "deb", "rpm"],
+    target: process.env.ELECTRON_LINUX_TARGETS?.split(",").filter(Boolean) ??
+      (process.platform === "linux" ? ["AppImage", "deb", "rpm"] : ["AppImage"]),
   },
 })
 
@@ -92,6 +97,7 @@ function getConfig() {
         ...base,
         appId: "ai.opencode.desktop.dev",
         productName: "OpenCode Dev",
+        deb: { packageName: "opencode-dev" },
         rpm: { packageName: "opencode-dev" },
       }
     }
@@ -102,6 +108,7 @@ function getConfig() {
         productName: "OpenCode Beta",
         protocols: { name: "OpenCode Beta", schemes: ["opencode"] },
         publish: { provider: "github", owner: "anomalyco", repo: "opencode-beta", channel: "latest" },
+        deb: { packageName: "opencode-beta" },
         rpm: { packageName: "opencode-beta" },
       }
     }
@@ -112,6 +119,7 @@ function getConfig() {
         productName: "OpenCode",
         protocols: { name: "OpenCode", schemes: ["opencode"] },
         publish: { provider: "github", owner: "anomalyco", repo: "opencode", channel: "latest" },
+        deb: { packageName: "opencode" },
         rpm: { packageName: "opencode" },
       }
     }

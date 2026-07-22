@@ -6,12 +6,14 @@ await $`bun ./scripts/copy-icons.ts ${process.env.OPENCODE_CHANNEL ?? "dev"}`
 
 const RUST_TARGET = Bun.env.RUST_TARGET
 
-const sidecarConfig = getCurrentSidecar(RUST_TARGET)
+const sidecar = getCurrentSidecar(RUST_TARGET)
 
-const binaryPath = windowsify(`../opencode/dist/${sidecarConfig.ocBinary}/bin/opencode`)
+const binary = windowsify(
+  `../opencode/dist/${sidecar.ocBinary.replace("opencode-", "@costrict/cs-")}/bin/cs`,
+  sidecar,
+)
 
-await (sidecarConfig.ocBinary.includes("-baseline")
-  ? $`cd ../opencode && bun run build --single --baseline`
-  : $`cd ../opencode && bun run build --single`)
+await $`cd ../opencode && bun run build:builtin-agents`
+await $`cd ../opencode && COSTRICT_CHANNEL=local bun run script/build.ts --target ${sidecar.ocBinary.replace("opencode-", "")}`
 
-await copyBinaryToSidecarFolder(binaryPath, RUST_TARGET)
+await copyBinaryToSidecarFolder(binary, sidecar)

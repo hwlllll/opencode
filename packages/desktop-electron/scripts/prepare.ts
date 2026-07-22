@@ -12,7 +12,7 @@ pkg.version = Script.version
 await Bun.write("./package.json", JSON.stringify(pkg, null, 2) + "\n")
 console.log(`Updated package.json version to ${Script.version}`)
 
-const sidecarConfig = getCurrentSidecar()
+const sidecar = getCurrentSidecar()
 const artifact = process.env.OPENCODE_CLI_ARTIFACT ?? "opencode-cli"
 
 const dir = "resources/opencode-binaries"
@@ -20,6 +20,6 @@ const dir = "resources/opencode-binaries"
 await $`mkdir -p ${dir}`
 await $`gh run download ${process.env.GITHUB_RUN_ID} -n ${artifact}`.cwd(dir)
 
-await copyBinaryToSidecarFolder(windowsify(`${dir}/${sidecarConfig.ocBinary}/bin/opencode`))
+await copyBinaryToSidecarFolder(windowsify(`${dir}/${sidecar.ocBinary}/bin/opencode`, sidecar), sidecar)
 
 await $`rm -rf ${dir}`
