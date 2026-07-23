@@ -6,4 +6,4 @@
  */
 
 export * as Extension from "./extension"
-export * as SkillBuiltin from "./skill/builtin"
+export * as SkillBuiltin from "./builtin"

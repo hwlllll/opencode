@@ -125,6 +125,7 @@ export function serve(hostname: string, port: number, password: string) {
   const env = {
     OPENCODE_SERVER_USERNAME: "opencode",
     OPENCODE_SERVER_PASSWORD: password,
+    COSTRICT_SERVER_PASSWORD: password,
   }
 
   return spawnCommand(args, env)

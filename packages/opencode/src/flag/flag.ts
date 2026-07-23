@@ -112,7 +112,8 @@ export namespace Flag {
   export const OPENCODE_ENABLE_INSTALL_DEPENDENCIES = truthy("OPENCODE_ENABLE_INSTALL_DEPENDENCIES")
   export const OPENCODE_FAKE_VCS = process.env["OPENCODE_FAKE_VCS"]
   export declare const OPENCODE_CLIENT: string
-  export const OPENCODE_SERVER_PASSWORD = process.env["COSTRICT_SERVER_PASSWORD"]
+  export const OPENCODE_SERVER_PASSWORD =
+    process.env["COSTRICT_SERVER_PASSWORD"] ?? process.env["OPENCODE_SERVER_PASSWORD"]
   export const OPENCODE_SERVER_USERNAME = process.env["OPENCODE_SERVER_USERNAME"]
   export const OPENCODE_MODELS_URL = process.env["OPENCODE_MODELS_URL"]
   export const OPENCODE_DISABLE_FILETIME_CHECK = Config.boolean("OPENCODE_DISABLE_FILETIME_CHECK").pipe(

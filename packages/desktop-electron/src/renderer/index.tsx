@@ -265,11 +265,6 @@ render(() => {
   // Fetch sidecar credentials (available immediately, before health check)
   const [sidecar] = createResource(() => window.api.awaitInitialization(() => undefined))
 
-  const [defaultServer] = createResource(() =>
-    platform.getDefaultServerUrl?.().then((url) => {
-      if (url) return ServerConnection.key({ type: "http", http: { url } })
-    }),
-  )
   const [locale] = createResource(loadLocale)
 
   const servers = () => {
@@ -324,11 +319,11 @@ render(() => {
   return (
     <PlatformProvider value={platform}>
       <AppBaseProviders locale={locale.latest}>
-        <Show when={!defaultServer.loading && !sidecar.loading && !windowCount.loading && !locale.loading}>
+        <Show when={!sidecar.loading && !windowCount.loading && !locale.loading}>
           {(_) => {
             return (
               <AppInterface
-                defaultServer={defaultServer.latest ?? ServerConnection.Key.make("sidecar")}
+                defaultServer={ServerConnection.Key.make("sidecar")}
                 servers={servers()}
                 router={MemoryRouter}
               >

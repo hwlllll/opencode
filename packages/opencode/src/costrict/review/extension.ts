@@ -20,7 +20,7 @@ import path from "path"
 import { writeFile, readFile, rm } from "fs/promises"
 import { Log } from "../../util/log"
 import { Filesystem } from "../../util/filesystem"
-import * as Builtin from "./skill/builtin"
+import * as Builtin from "./builtin"
 
 const log = Log.create({ service: "costrict-skill" })
 
