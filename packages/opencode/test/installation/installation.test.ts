@@ -3,6 +3,9 @@ import { Effect, Layer, Stream } from "effect"
 import { HttpClient, HttpClientRequest, HttpClientResponse } from "effect/unstable/http"
 import { ChildProcess, ChildProcessSpawner } from "effect/unstable/process"
 import { Installation } from "../../src/installation/index"
+import { Dicode } from "../../src/config/dicode"
+import { promises as fs } from "node:fs"
+import path from "node:path"
 
 // Save original environment
 const originalEnv = process.env.COSTRICT_CLIENT_ID
@@ -153,6 +156,32 @@ describe("installation", () => {
   })
 
   describe("latest", () => {
+    test("reads release version from Dicode download config", async () => {
+      await fs.mkdir(path.dirname(Dicode.file), { recursive: true })
+      await Bun.write(
+        Dicode.file,
+        JSON.stringify({
+          api: "https://api.example.com",
+          download: "https://download.example.com",
+        }),
+      )
+      const urls: string[] = []
+      const layer = testLayer((request) => {
+        urls.push(request.url.toString())
+        return jsonResponse({ tag_name: "v1.2.3" })
+      })
+
+      try {
+        const result = await Effect.runPromise(
+          Installation.Service.use((svc) => svc.latest("curl")).pipe(Effect.provide(layer)),
+        )
+        expect(result).toBe("1.2.3")
+        expect(urls).toEqual(["https://download.example.com/dicode/pkg/latest.json"])
+      } finally {
+        await fs.unlink(Dicode.file).catch(() => {})
+      }
+    })
+
     test("reads release version from GitHub releases", async () => {
       const layer = testLayer(() => jsonResponse({ tag_name: "v1.2.3" }))
 

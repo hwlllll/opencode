@@ -366,7 +366,7 @@
     },
     "packages/opencode": {
       "name": "@costrict/cs",
-      "version": "1.0.1",
+      "version": "1.0.0",
       "bin": {
         "dicode": "./bin/cs",
       },

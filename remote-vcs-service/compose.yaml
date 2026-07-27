@@ -5,12 +5,11 @@ services:
       - "8000:8000"
     environment:
       API_TOKEN: ${API_TOKEN:-123456}
-      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:8000}
-      DICODE_BASE_URL: ${DICODE_BASE_URL:-${PUBLIC_BASE_URL:-http://localhost:8000}}
       DATA_DIR: /data
       MAX_PACKAGE_BYTES: ${MAX_PACKAGE_BYTES:-2147483648}
     volumes:
       - data:/data
+      - ./config.json:/app/config.json:ro
     restart: unless-stopped
 
 volumes:

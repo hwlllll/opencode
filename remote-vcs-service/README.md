@@ -39,9 +39,16 @@ dicode upgrade
 ```bash
 cd remote-vcs-service
 export API_TOKEN='替换为强随机密钥'
-export PUBLIC_BASE_URL='https://download.example.com'
-export DICODE_BASE_URL='https://api.example.com'
 docker compose up --build -d
+```
+
+启动前编辑 `config.json`：
+
+```json
+{
+  "api": "https://api.example.com",
+  "download": "https://download.example.com"
+}
 ```
 
 生产环境应通过 Nginx、Caddy 或云负载均衡提供 HTTPS。
@@ -53,9 +60,7 @@ cd remote-vcs-service
 python -m venv .venv
 . .venv/bin/activate
 pip install -e '.[dev]'
-API_TOKEN=change-me PUBLIC_BASE_URL=http://localhost:8000 \
-  DICODE_BASE_URL=http://localhost:8000 \
-  uvicorn app.main:app --reload
+API_TOKEN=change-me uvicorn app.main:app --reload
 ```
 
 API 文档位于 <http://localhost:8000/docs>。
@@ -187,8 +192,6 @@ data/
 | 变量 | 说明 |
 | --- | --- |
 | `API_TOKEN` | 管理接口 Bearer Token；生产环境必须设置 |
-| `PUBLIC_BASE_URL` | 安装脚本和安装包使用的公开下载地址 |
-| `DICODE_BASE_URL` | 安装后 CLI 使用的登录/API 地址；默认与下载地址相同 |
 | `DATA_DIR` | 数据目录，默认 `./data` |
 | `MAX_PACKAGE_BYTES` | 单个安装包最大字节数，默认 2 GiB |
 
@@ -200,9 +203,10 @@ data/
 curl -fsSL https://download.example.com/install.sh | bash
 ```
 
-服务端会把两个地址写入动态生成的安装脚本。安装完成后：
+服务端从 `config.json` 读取两个地址，并通过动态安装脚本写入客户端
+`~/.dicode/config.json`：
 
-- `DICODE_DOWNLOAD_BASE_URL` 指向 `PUBLIC_BASE_URL`，用于升级和安装包下载。
-- `DICODE_BASE_URL` 指向服务后端，用于登录和 API。
+- `download` 用于版本查询、升级和安装包下载。
+- `api` 用于登录、鉴权和业务 API。
 
-修改地址时只需更新服务端环境变量并重启发布服务；用户重新执行安装命令后会更新本地配置。
+修改地址时只需更新服务端 `config.json` 并重启发布服务；用户重新执行安装命令后会更新本地配置。

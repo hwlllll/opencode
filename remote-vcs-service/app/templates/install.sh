@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-download=${DICODE_DOWNLOAD_BASE_URL:-"__DOWNLOAD_BASE_URL__"}
-base=${DICODE_BASE_URL:-"__DICODE_BASE_URL__"}
+download="__DOWNLOAD_BASE_URL__"
+base="__DICODE_BASE_URL__"
 download=${download%/}
 base=${base%/}
 version=${VERSION:-}
@@ -157,6 +157,11 @@ if ! (cd "$dir" && "$dir/dicode" --version) >/dev/null 2>&1; then
 fi
 rm -f "$dir/dicode.old"
 
+mkdir -p "$HOME/.dicode"
+api=$(printf '%s' "$base" | sed 's/\\/\\\\/g; s/"/\\"/g')
+url=$(printf '%s' "$download" | sed 's/\\/\\\\/g; s/"/\\"/g')
+printf '{\n  "api": "%s",\n  "download": "%s"\n}\n' "$api" "$url" > "$HOME/.dicode/config.json"
+
 if [ "$modify" = true ]; then
   case "${SHELL:-}" in
     */zsh) rc="$HOME/.zshrc" ;;
@@ -175,8 +180,6 @@ if [ "$modify" = true ]; then
     echo
     echo "# Dicode"
     echo "export PATH=\"$dir:\$PATH\""
-    echo "export DICODE_BASE_URL=\"$base\""
-    echo "export DICODE_DOWNLOAD_BASE_URL=\"$download\""
   } >> "$rc"
   echo "Updated Dicode configuration in $rc"
 fi

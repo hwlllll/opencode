@@ -1,11 +1,12 @@
 import { test, expect, mock } from "bun:test"
 import { promises as fs } from "node:fs"
-import { join } from "node:path"
+import { dirname, join } from "node:path"
 import { homedir } from "node:os"
 import { createCoStrictCustomLoader } from "../../../src/costrict/provider/index"
 import { getCoStrictBaseURL } from "../../../src/costrict/provider/auth"
 import { Installation } from "../../../src/installation/index"
 import { clearModelCache } from "../../../src/costrict/provider/models"
+import { Dicode } from "../../../src/config/dicode"
 
 // Mock homedir to use temp directory
 mock.module("node:os", () => ({
@@ -32,8 +33,8 @@ test("createCoStrictCustomLoader: conditional refresh with refresh_token and inv
     updated_at: new Date().toISOString(),
   }
 
-  const filepath = join(testHome, ".costrict", "share", "auth.json")
-  await fs.mkdir(join(testHome, ".costrict", "share"), { recursive: true })
+  const filepath = join(testHome, ".dicode", "share", "auth.json")
+  await fs.mkdir(dirname(filepath), { recursive: true })
   await fs.writeFile(filepath, JSON.stringify(credentials, null, 2))
 
   // Mock fetch for models and token refresh
@@ -96,11 +97,15 @@ test("createCoStrictCustomLoader: conditional refresh with refresh_token and inv
   }
 })
 
-test("getCoStrictBaseURL: DICODE_BASE_URL takes priority", () => {
-  const dicode = process.env.DICODE_BASE_URL
-  const previous = process.env.COSTRICT_BASE_URL
-  process.env.DICODE_BASE_URL = "https://dicode.example.com"
-  process.env.COSTRICT_BASE_URL = "https://prod.example.com"
+test("getCoStrictBaseURL: Dicode config takes priority", async () => {
+  await fs.mkdir(dirname(Dicode.file), { recursive: true })
+  await fs.writeFile(
+    Dicode.file,
+    JSON.stringify({
+      api: "https://dicode.example.com",
+      download: "https://download.example.com",
+    }),
+  )
 
   try {
     expect(getCoStrictBaseURL(undefined, "https://test.example.com")).toBe("https://dicode.example.com")
@@ -108,19 +113,22 @@ test("getCoStrictBaseURL: DICODE_BASE_URL takes priority", () => {
       "https://dicode.example.com",
     )
   } finally {
-    if (dicode === undefined) delete process.env.DICODE_BASE_URL
-    else process.env.DICODE_BASE_URL = dicode
-    if (previous === undefined) delete process.env.COSTRICT_BASE_URL
-    else process.env.COSTRICT_BASE_URL = previous
+    await fs.unlink(Dicode.file).catch(() => {})
   }
 })
 
-test("createCoStrictCustomLoader: refresh uses COSTRICT_BASE_URL when auth.json points elsewhere", async () => {
+test("createCoStrictCustomLoader: refresh uses Dicode config when auth.json points elsewhere", async () => {
   const testHome = process.env.COSTRICT_TEST_HOME
   if (!testHome) throw new Error("COSTRICT_TEST_HOME not set")
 
-  const previous = process.env.COSTRICT_BASE_URL
-  process.env.COSTRICT_BASE_URL = "https://prod.example.com"
+  await fs.mkdir(dirname(Dicode.file), { recursive: true })
+  await fs.writeFile(
+    Dicode.file,
+    JSON.stringify({
+      api: "https://prod.example.com",
+      download: "https://download.example.com",
+    }),
+  )
 
   const credentials = {
     id: "opencode",
@@ -134,8 +142,8 @@ test("createCoStrictCustomLoader: refresh uses COSTRICT_BASE_URL when auth.json 
     updated_at: new Date().toISOString(),
   }
 
-  const filepath = join(testHome, ".costrict", "share", "auth.json")
-  await fs.mkdir(join(testHome, ".costrict", "share"), { recursive: true })
+  const filepath = join(testHome, ".dicode", "share", "auth.json")
+  await fs.mkdir(dirname(filepath), { recursive: true })
   await fs.writeFile(filepath, JSON.stringify(credentials, null, 2))
 
   const originalFetch = globalThis.fetch
@@ -185,8 +193,7 @@ test("createCoStrictCustomLoader: refresh uses COSTRICT_BASE_URL when auth.json 
     expect(saved.base_url).toBe("https://prod.example.com")
   } finally {
     globalThis.fetch = originalFetch
-    if (previous === undefined) delete process.env.COSTRICT_BASE_URL
-    else process.env.COSTRICT_BASE_URL = previous
+    await fs.unlink(Dicode.file).catch(() => {})
     await fs.unlink(filepath).catch(() => {})
   }
 })

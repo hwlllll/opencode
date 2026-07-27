@@ -113,7 +113,13 @@ bun --cwd packages/opencode run build:builtin-agents && bun --cwd packages/openc
   cd /workspaces/opencode/remote-vcs-service
 
   export API_TOKEN='强随机管理密钥'
-  export PUBLIC_BASE_URL='https://download.example.com'
+
+  编辑 remote-vcs-service/config.json：
+
+  {
+    "api": "https://api.example.com",
+    "download": "https://download.example.com"
+  }
 
   docker compose up --build -d
 
@@ -270,7 +276,7 @@ bun --cwd packages/opencode run build:builtin-agents && bun --cwd packages/openc
   6. 解压程序
   7. 执行 dicode --version 验证
   8. 安装到用户目录
-  9. 配置 PATH 和 DICODE_BASE_URL
+  9. 配置 PATH 和 ~/.dicode/config.json
 
   安装位置：
 

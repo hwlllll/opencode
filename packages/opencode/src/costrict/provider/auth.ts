@@ -13,6 +13,7 @@ import { extractExpiryFromJWT } from "./token"
 import { Log } from "../../util/log"
 import { buildOAuthParams } from "./oauth-params"
 import { Flag } from "../../flag/flag"
+import { Dicode } from "../../config/dicode"
 
 const log = Log.create({ service: "costrict" })
 
@@ -42,17 +43,16 @@ export function generateState(): string {
 
 /**
  * 获取 CoStrict Base URL
- * 优先级: 环境变量 > providerApi > credentialsBaseUrl > 默认值
+ * 优先级: Dicode 配置 > providerApi > credentialsBaseUrl > 默认值
  *
  * @param providerApi 来自配置文件的 provider.api
  * @param credentialsBaseUrl 来自凭证文件的 base_url
  * @returns Base URL (不含尾部斜杠)
  */
 export function getCoStrictBaseURL(providerApi?: string, credentialsBaseUrl?: string): string {
-  const envUrl = process.env["DICODE_BASE_URL"] || process.env["COSTRICT_BASE_URL"]
   const defaultUrl = "https://zgsm.sangfor.com"
 
-  const baseUrl = envUrl || providerApi || credentialsBaseUrl || defaultUrl
+  const baseUrl = Dicode.api() || providerApi || credentialsBaseUrl || defaultUrl
 
   // 移除可能的端点后缀
   return baseUrl.replace(/\/chat-rag\/api\/v1$/, "").replace(/\/$/, "")

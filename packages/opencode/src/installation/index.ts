@@ -12,6 +12,7 @@ import { Log } from "../util/log"
 import { createHash } from "node:crypto"
 import { hostname, userInfo } from "node:os"
 import Package from "../../package.json"
+import { Dicode } from "../config/dicode"
 
 import semver from "semver"
 
@@ -158,23 +159,19 @@ export namespace Installation {
 
         const upgradeCurl = Effect.fnUntraced(
           function* (target: string) {
-            const base = Flag.DICODE_DOWNLOAD_BASE_URL || Flag.COSTRICT_BASE_URL || "https://zgsm.sangfor.com"
+            const base = Dicode.download() || "https://costrict.ai"
 
             // Windows: use install.bat
             if (process.platform === "win32") {
-              const installBatUrl = Flag.DICODE_DOWNLOAD_BASE_URL
-                ? `${base}/install.bat`
-                : Flag.COSTRICT_BASE_URL
-                  ? `${base}/costrict-cli/install.bat`
-                  : "https://costrict.ai/install.bat"
+              const url = `${base}/install.bat`
               const response = yield* httpOk.execute(
-                HttpClientRequest.get(installBatUrl),
+                HttpClientRequest.get(url),
               )
               const body = yield* response.text
               const bodyBytes = new TextEncoder().encode(body)
               const proc = ChildProcess.make("cmd", ["/c"], {
                 stdin: Stream.make(bodyBytes),
-                env: { VERSION: target, DICODE_DOWNLOAD_BASE_URL: base },
+                env: { VERSION: target },
                 extendEnv: true,
               })
               const handle = yield* spawner.spawn(proc)
@@ -187,19 +184,15 @@ export namespace Installation {
             }
 
             // Unix-like: use install.sh via bash
-            const installScriptUrl = Flag.DICODE_DOWNLOAD_BASE_URL
-              ? `${base}/install.sh`
-              : Flag.COSTRICT_BASE_URL
-                ? `${base}/costrict-cli/install.sh`
-                : "https://costrict.ai/install.sh"
+            const url = `${base}/install.sh`
             const response = yield* httpOk.execute(
-              HttpClientRequest.get(installScriptUrl),
+              HttpClientRequest.get(url),
             )
             const body = yield* response.text
             const bodyBytes = new TextEncoder().encode(body)
             const proc = ChildProcess.make("bash", [], {
               stdin: Stream.make(bodyBytes),
-              env: { VERSION: target, DICODE_DOWNLOAD_BASE_URL: base },
+              env: { VERSION: target },
               extendEnv: true,
             })
             const handle = yield* spawner.spawn(proc)
@@ -316,7 +309,7 @@ export namespace Installation {
             return data.version
           }
 
-          const base = Flag.DICODE_DOWNLOAD_BASE_URL || Flag.COSTRICT_BASE_URL || "https://zgsm.sangfor.com"
+          const base = Dicode.download() || "https://costrict.ai"
           const response = yield* httpOk.execute(
             HttpClientRequest.get(`${base}/dicode/pkg/latest.json`).pipe(
               HttpClientRequest.acceptJson,

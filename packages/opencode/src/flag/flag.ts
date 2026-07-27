@@ -1,4 +1,5 @@
 import { Config } from "effect"
+import { Dicode } from "../config/dicode"
 
 function truthy(key: string) {
   const value = process.env[key]?.toLowerCase()
@@ -60,9 +61,7 @@ export namespace Flag {
   // export const COSTRICT_CLIENT = process.env["COSTRICT_CLIENT"] ?? "cli"
   // export const COSTRICT_SERVER_PASSWORD = process.env["COSTRICT_SERVER_PASSWORD"]
   export const COSTRICT_SERVER_USERNAME = process.env["COSTRICT_SERVER_USERNAME"]
-  export const DICODE_BASE_URL = process.env["DICODE_BASE_URL"]
-  export const DICODE_DOWNLOAD_BASE_URL = process.env["DICODE_DOWNLOAD_BASE_URL"]
-  export const COSTRICT_BASE_URL = DICODE_BASE_URL || process.env["COSTRICT_BASE_URL"]
+  export const COSTRICT_BASE_URL = Dicode.api()
   export const COSTRICT_CLOUD_BASE_URL = process.env["COSTRICT_CLOUD_BASE_URL"]
   export const COSTRICT_APP_URL = process.env["COSTRICT_APP_URL"]
   // Skip TLS certificate verification (insecure, for development/testing only)

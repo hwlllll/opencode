@@ -1,10 +1,10 @@
 @echo off
 setlocal EnableExtensions EnableDelayedExpansion
 
-if not defined DICODE_DOWNLOAD_BASE_URL set "DICODE_DOWNLOAD_BASE_URL=__DOWNLOAD_BASE_URL__"
-if not defined DICODE_BASE_URL set "DICODE_BASE_URL=__DICODE_BASE_URL__"
-if "%DICODE_DOWNLOAD_BASE_URL:~-1%"=="/" set "DICODE_DOWNLOAD_BASE_URL=%DICODE_DOWNLOAD_BASE_URL:~0,-1%"
-if "%DICODE_BASE_URL:~-1%"=="/" set "DICODE_BASE_URL=%DICODE_BASE_URL:~0,-1%"
+set "DOWNLOAD=__DOWNLOAD_BASE_URL__"
+set "BASE=__DICODE_BASE_URL__"
+if "%DOWNLOAD:~-1%"=="/" set "DOWNLOAD=%DOWNLOAD:~0,-1%"
+if "%BASE:~-1%"=="/" set "BASE=%BASE:~0,-1%"
 if not defined DICODE_INSTALL_DIR set "DICODE_INSTALL_DIR=%USERPROFILE%\.dicode\bin"
 set "VERSION=%VERSION%"
 set "MODIFY_PATH=1"
@@ -60,7 +60,7 @@ if errorlevel 1 (
 )
 
 if not defined VERSION (
-  powershell -NoProfile -ExecutionPolicy Bypass -Command "try { $m=Invoke-RestMethod -Uri '!DICODE_DOWNLOAD_BASE_URL!/dicode/pkg/latest.json' -TimeoutSec 30; $m.tag_name } catch { exit 1 }" > "!TMPDIR!\version.txt"
+  powershell -NoProfile -ExecutionPolicy Bypass -Command "try { $m=Invoke-RestMethod -Uri '!DOWNLOAD!/dicode/pkg/latest.json' -TimeoutSec 30; $m.tag_name } catch { exit 1 }" > "!TMPDIR!\version.txt"
   if errorlevel 1 goto latest_error
   set /p VERSION=<"!TMPDIR!\version.txt"
 )
@@ -68,7 +68,7 @@ if "!VERSION:~0,1!"=="v" set "VERSION=!VERSION:~1!"
 if not defined VERSION goto latest_error
 
 set "ARCHIVE=!TARGET!.zip"
-set "URL=!DICODE_DOWNLOAD_BASE_URL!/dicode/pkg/!VERSION!/!ARCHIVE!"
+set "URL=!DOWNLOAD!/dicode/pkg/!VERSION!/!ARCHIVE!"
 echo Installing Dicode !VERSION! for Windows/!ARCH!...
 
 powershell -NoProfile -ExecutionPolicy Bypass -Command "try { Invoke-WebRequest -Uri '!URL!' -OutFile '!TMPDIR!\!ARCHIVE!' -UseBasicParsing -TimeoutSec 600; Invoke-WebRequest -Uri '!URL!.sha256' -OutFile '!TMPDIR!\!ARCHIVE!.sha256' -UseBasicParsing -TimeoutSec 30 } catch { Write-Error $_; exit 1 }"
@@ -106,8 +106,11 @@ if errorlevel 1 goto restore
 if errorlevel 1 goto restore
 if exist "!DICODE_INSTALL_DIR!\dicode.old.exe" del /q "!DICODE_INSTALL_DIR!\dicode.old.exe"
 
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$d=Join-Path $env:USERPROFILE '.dicode'; New-Item -ItemType Directory -Force -Path $d | Out-Null; [ordered]@{api='!BASE!';download='!DOWNLOAD!'} | ConvertTo-Json | Set-Content -Encoding utf8 (Join-Path $d 'config.json')"
+if errorlevel 1 goto restore
+
 if "!MODIFY_PATH!"=="1" (
-  powershell -NoProfile -ExecutionPolicy Bypass -Command "$d='!DICODE_INSTALL_DIR!'; $p=[Environment]::GetEnvironmentVariable('Path','User'); $a=$p -split ';'; if ($d -notin $a) { [Environment]::SetEnvironmentVariable('Path',(($a + $d | Where-Object { $_ }) -join ';'),'User') }; [Environment]::SetEnvironmentVariable('DICODE_BASE_URL','!DICODE_BASE_URL!','User'); [Environment]::SetEnvironmentVariable('DICODE_DOWNLOAD_BASE_URL','!DICODE_DOWNLOAD_BASE_URL!','User')"
+  powershell -NoProfile -ExecutionPolicy Bypass -Command "$d='!DICODE_INSTALL_DIR!'; $p=[Environment]::GetEnvironmentVariable('Path','User'); $a=$p -split ';'; if ($d -notin $a) { [Environment]::SetEnvironmentVariable('Path',(($a + $d | Where-Object { $_ }) -join ';'),'User') }; [Environment]::SetEnvironmentVariable('DICODE_BASE_URL',$null,'User'); [Environment]::SetEnvironmentVariable('DICODE_DOWNLOAD_BASE_URL',$null,'User')"
 )
 
 rmdir /s /q "!TMPDIR!" >nul 2>&1

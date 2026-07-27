@@ -11,6 +11,7 @@ import { SessionID } from "@/session/schema"
 import { Instance } from "@/project/instance"
 import { git } from "@/util/git"
 import { getRawDumpEventEnvKey, type RawDumpEventPayload } from "./spawn"
+import { Dicode } from "@/config/dicode"
 
 const log = Log.create({ service: "raw-dump.worker" })
 const STATE_FILE = path.join(os.homedir(), ".dicode", "raw-dump-state.json")
@@ -251,7 +252,7 @@ function resolveRawDumpBaseUrl(baseUrl?: string) {
   const explicit = process.env.COSTRICT_RAW_DUMP_BASE_URL || process.env.OPENCODE_RAW_DUMP_BASE_URL
   if (explicit) return explicit.replace(/\/$/, "")
 
-  const raw = (baseUrl || process.env.COSTRICT_BASE_URL || "https://zgsm.sangfor.com").replace(/\/$/, "")
+  const raw = (baseUrl || Dicode.api() || "https://zgsm.sangfor.com").replace(/\/$/, "")
   if (raw.includes("/chat-rag/api/forward")) {
     try {
       const url = new URL(raw)
