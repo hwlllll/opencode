@@ -2,7 +2,7 @@ export function listBuiltinSkills() {
   return []
 }
 
-export function getBuiltinSkillVersion(_name: string) {
+export function getBuiltinSkillVersion(_name: string): string | undefined {
   return undefined
 }
 
