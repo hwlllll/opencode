@@ -37,10 +37,12 @@ logs/
 .gemini.log
 
 .opencode
-.costrict
+.dicode
 .cospec
 tsconfig.tsbuildinfo
 .bunfig.toml
 .cache
 skills
 packages/opencode/src/costrict/review/skill/
+
+dicode.json

@@ -32,9 +32,9 @@ export namespace LearningStorage {
    */
   export function getLearningsDir(scope: "project" | "global" = "project"): string {
     if (scope === "global") {
-      return path.join(Global.Path.home, ".costrict", ".learnings")
+      return path.join(Global.Path.home, ".dicode", ".learnings")
     }
-    return path.join(Instance.directory, ".costrict", ".learnings")
+    return path.join(Instance.directory, ".dicode", ".learnings")
   }
 
   /**

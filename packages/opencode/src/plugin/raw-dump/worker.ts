@@ -13,7 +13,7 @@ import { git } from "@/util/git"
 import { getRawDumpEventEnvKey, type RawDumpEventPayload } from "./spawn"
 
 const log = Log.create({ service: "raw-dump.worker" })
-const STATE_FILE = path.join(os.homedir(), ".costrict", "raw-dump-state.json")
+const STATE_FILE = path.join(os.homedir(), ".dicode", "raw-dump-state.json")
 
 type RawDumpState = {
   conversation: Record<string, true>

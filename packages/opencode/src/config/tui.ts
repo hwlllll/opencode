@@ -144,7 +144,7 @@ export namespace TuiConfig {
     for (const dir of unique(directories)) {
       if (
         !dir.endsWith(".opencode") &&
-        !dir.endsWith(".costrict") &&
+        !dir.endsWith(".dicode") &&
         dir !== Flag.OPENCODE_CONFIG_DIR &&
         dir !== Flag.COSTRICT_CONFIG_DIR
       )

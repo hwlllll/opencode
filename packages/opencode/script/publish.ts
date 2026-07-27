@@ -29,7 +29,7 @@ await Bun.file(`./dist/${pkg.name}/package.json`).write(
     {
       name: pkg.name,
       bin: {
-        cs: `./bin/cs`,
+        dicode: `./bin/cs`,
       },
       scripts: {
         postinstall: "bun ./postinstall.mjs || node ./postinstall.mjs",
@@ -72,4 +72,3 @@ const platforms = "linux/amd64,linux/arm64"
 const tags = [`${image}:${version}`, `${image}:${Script.channel}`]
 const tagFlags = tags.flatMap((t) => ["-t", t])
 // await $`docker buildx build --platform ${platforms} ${tagFlags} --push .`
-

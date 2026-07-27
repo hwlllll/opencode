@@ -3,7 +3,6 @@ import { cmd } from "./cmd"
 import * as prompts from "@clack/prompts"
 import { UI } from "../ui"
 import { ModelsDev } from "../../provider/models"
-import { map, pipe, sortBy, values } from "remeda"
 import path from "path"
 import os from "os"
 import { Config } from "../../config/config"
@@ -301,76 +300,15 @@ export const ProvidersLoginCommand = cmd({
           prompts.outro("Done")
           return
         }
-        await ModelsDev.refresh().catch(() => {})
-
         const config = await Config.get()
 
         const disabled = new Set(config.disabled_providers ?? [])
         const enabled = config.enabled_providers ? new Set(config.enabled_providers) : undefined
 
-        const providers = await ModelsDev.get().then((x) => {
-          const filtered: Record<string, (typeof x)[string]> = {}
-          for (const [key, value] of Object.entries(x)) {
-            if ((enabled ? enabled.has(key) : true) && !disabled.has(key)) {
-              filtered[key] = value
-            }
-          }
-
-          // COSTRICT: 手动添加 CoStrict provider（如果不存在）
-          if (!filtered["costrict"] && !disabled.has("costrict") && (enabled ? enabled.has("costrict") : true)) {
-            filtered["costrict"] = {
-              id: "costrict",
-              name: "CoStrict",
-              env: ["COSTRICT_API_KEY"],
-              models: {},
-            }
-          }
-
-          return filtered
-        })
-
-        const priority: Record<string, number> = {
-          costrict: 0,
-          anthropic: 1,
-          "github-copilot": 2,
-          openai: 3,
-          google: 4,
-          opencode: 5,
-          openrouter: 6,
-          vercel: 7,
-        }
-        const pluginProviders = resolvePluginProviders({
-          hooks: await Plugin.list(),
-          existingProviders: providers,
-          disabled,
-          enabled,
-          providerNames: Object.fromEntries(Object.entries(config.provider ?? {}).map(([id, p]) => [id, p.name])),
-        })
-
-        const options = [
-          ...pipe(
-            providers,
-            values(),
-            sortBy(
-              (x) => priority[x.id] ?? 99,
-              (x) => x.name ?? x.id,
-            ),
-            map((x) => ({
-              label: x.name,
-              value: x.id,
-              hint: {
-                costrict: "recommended",
-                opencode: "recommended",
-                openai: "ChatGPT Plus/Pro or API key",
-              }[x.id],
-            })),
-          ),
-          ...pluginProviders.map((x) => ({
-            label: x.name,
-            value: x.id,
-            hint: "plugin",
-          })),
-        ]
+        const options =
+          !disabled.has("costrict") && (!enabled || enabled.has("costrict"))
+            ? [{ label: "Dicode", value: "costrict", hint: "recommended" }]
+            : []
 
         let provider: string
         if (args.provider) {
@@ -391,7 +329,7 @@ export const ProvidersLoginCommand = cmd({
               ...options,
               {
                 value: "other",
-                label: "Other",
+                label: "OpenAI Compatible",
               },
             ],
           })
@@ -420,7 +358,7 @@ export const ProvidersLoginCommand = cmd({
           }
 
           prompts.log.warn(
-            `This only stores a credential for ${provider} - you will need configure it in costrict.json, check the docs for examples.`,
+            `This only stores a credential for ${provider} - you will need configure it in dicode.json, check the docs for examples.`,
           )
         }
 
@@ -429,7 +367,7 @@ export const ProvidersLoginCommand = cmd({
             "Amazon Bedrock authentication priority:\n" +
               "  1. Bearer token (AWS_BEARER_TOKEN_BEDROCK or /connect)\n" +
               "  2. AWS credential chain (profile, access keys, IAM roles, EKS IRSA)\n\n" +
-              "Configure via costrict.json options (profile, region, endpoint) or\n" +
+              "Configure via dicode.json options (profile, region, endpoint) or\n" +
               "AWS environment variables (AWS_PROFILE, AWS_REGION, AWS_ACCESS_KEY_ID, AWS_WEB_IDENTITY_TOKEN_FILE).",
           )
         }

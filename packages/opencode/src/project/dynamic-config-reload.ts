@@ -5,8 +5,8 @@ import { FileWatcher } from "@/file/watcher"
 import { Log } from "@/util/log"
 
 const log = Log.create({ service: "dynamic-config-reload" })
-const DYNAMIC_CONFIG_FILE = /^(?:\.costrict\/|\.opencode\/)?(?:agent|agents|command|commands)\/.+\.md$/i
-const DYNAMIC_SKILL_FILE = /^(?:(?:\.costrict|\.claude|\.agents)\/)?skills\/.+\/SKILL\.md$/i
+const DYNAMIC_CONFIG_FILE = /^(?:\.dicode\/|\.opencode\/)?(?:agent|agents|command|commands)\/.+\.md$/i
+const DYNAMIC_SKILL_FILE = /^(?:(?:\.dicode|\.claude|\.agents)\/)?skills\/.+\/SKILL\.md$/i
 const OPENCODE_SKILL_FILE = /^(?:\.opencode\/)?(?:skill|skills)\/.+\/SKILL\.md$/i
 
 function normalize(file: string) {

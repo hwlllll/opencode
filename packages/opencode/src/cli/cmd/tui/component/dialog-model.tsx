@@ -30,41 +30,7 @@ export function DialogModel(props: { providerID?: string }) {
 
   const options = createMemo(() => {
     const needle = query().trim()
-    const showSections = showExtra() && needle.length === 0
     const favorites = connected() ? local.model.favorite() : []
-    const recents = local.model.recent()
-
-    function toOptions(items: typeof favorites, category: string) {
-      if (!showSections) return []
-      return items.flatMap((item) => {
-        const provider = sync.data.provider.find((x) => x.id === item.providerID)
-        if (!provider) return []
-        const model = provider.models[item.modelID]
-        if (!model) return []
-        return [
-          {
-            key: item,
-            value: { providerID: provider.id, modelID: model.id },
-            title: model.name ?? item.modelID,
-            description: provider.name,
-            category,
-            disabled: provider.id === "opencode" && model.id.includes("-nano"),
-            footer: model.cost?.input === 0 && provider.id === "opencode" ? "Free" : undefined,
-            onSelect: () => {
-              onSelect(provider.id, model.id)
-            },
-          },
-        ]
-      })
-    }
-
-    const favoriteOptions = toOptions(favorites, "Favorites")
-    const recentOptions = toOptions(
-      recents.filter(
-        (item) => !favorites.some((fav) => fav.providerID === item.providerID && fav.modelID === item.modelID),
-      ),
-      "Recent",
-    )
 
     const providerOptions = pipe(
       sync.data.provider,
@@ -93,14 +59,6 @@ export function DialogModel(props: { providerID?: string }) {
               onSelect(provider.id, model)
             },
           })),
-          filter((x) => {
-            if (!showSections) return true
-            if (favorites.some((item) => item.providerID === x.value.providerID && item.modelID === x.value.modelID))
-              return false
-            if (recents.some((item) => item.providerID === x.value.providerID && item.modelID === x.value.modelID))
-              return false
-            return true
-          }),
           sortBy(
             (x) => x.footer !== "Free",
             (x) => x.title,
@@ -127,7 +85,7 @@ export function DialogModel(props: { providerID?: string }) {
       ]
     }
 
-    return [...favoriteOptions, ...recentOptions, ...providerOptions, ...popularProviders]
+    return [...providerOptions, ...popularProviders]
   })
 
   const provider = createMemo(() =>

@@ -984,7 +984,7 @@ export namespace Provider {
           // Models will be loaded dynamically by CUSTOM_LOADER from /ai-gateway/api/v1/models
           database[ProviderID.costrict] = {
             id: ProviderID.costrict,
-            name: "CoStrict",
+            name: "Dicode",
             source: "custom",
             env: ["COSTRICT_API_KEY"],
             options: {},
@@ -1017,10 +1017,24 @@ export namespace Provider {
             },
           }
 
+          const configProviders = Object.entries(cfg.provider ?? {})
+          const custom = new Set(
+            configProviders
+              .filter(([id, provider]) => {
+                if (id === ProviderID.costrict || modelsDev[id]) return false
+                if (provider.npm && provider.npm !== "@ai-sdk/openai-compatible") return false
+                return Object.values(provider.models ?? {}).every((model) => {
+                  const npm = model.provider?.npm
+                  return !npm || npm === "@ai-sdk/openai-compatible"
+                })
+              })
+              .map(([id]) => id),
+          )
           const disabled = new Set(cfg.disabled_providers ?? [])
           const enabled = cfg.enabled_providers ? new Set(cfg.enabled_providers) : null
 
           function isProviderAllowed(providerID: ProviderID): boolean {
+            if (providerID !== ProviderID.costrict && !custom.has(providerID)) return false
             if (enabled && !enabled.has(providerID)) return false
             if (disabled.has(providerID)) return false
             return true
@@ -1040,8 +1054,6 @@ export namespace Provider {
           } = {}
 
           log.info("init")
-
-          const configProviders = Object.entries(cfg.provider ?? {})
 
           function mergeProvider(providerID: ProviderID, provider: Partial<Info>) {
             const existing = providers[providerID]
@@ -1150,7 +1162,7 @@ export namespace Provider {
           const env = Env.all()
           for (const [id, provider] of Object.entries(database)) {
             const providerID = ProviderID.make(id)
-            if (disabled.has(providerID)) continue
+            if (!isProviderAllowed(providerID)) continue
             const apiKey = provider.env.map((item) => env[item]).find(Boolean)
             if (!apiKey) continue
             mergeProvider(providerID, {
@@ -1163,7 +1175,7 @@ export namespace Provider {
           const auths = yield* auth.all().pipe(Effect.orDie)
           for (const [id, provider] of Object.entries(auths)) {
             const providerID = ProviderID.make(id)
-            if (disabled.has(providerID)) continue
+            if (!isProviderAllowed(providerID)) continue
             if (provider.type === "api") {
               mergeProvider(providerID, {
                 source: "api",
@@ -1176,7 +1188,7 @@ export namespace Provider {
           for (const plugin of plugins) {
             if (!plugin.auth) continue
             const providerID = ProviderID.make(plugin.auth.provider)
-            if (disabled.has(providerID)) continue
+            if (!isProviderAllowed(providerID)) continue
 
             const pluginAuth = yield* auth.get(providerID).pipe(Effect.orDie)
             if (!pluginAuth) continue
@@ -1192,7 +1204,7 @@ export namespace Provider {
 
           for (const [id, fn] of Object.entries(CUSTOM_LOADERS)) {
             const providerID = ProviderID.make(id)
-            if (disabled.has(providerID)) continue
+            if (!isProviderAllowed(providerID)) continue
             const data = database[providerID]
             if (!data) {
               log.error("Provider does not exist in model list " + providerID)
@@ -1218,6 +1230,7 @@ export namespace Provider {
           // load config
           for (const [id, provider] of configProviders) {
             const providerID = ProviderID.make(id)
+            if (!isProviderAllowed(providerID)) continue
             const partial: Partial<Info> = { source: "config" }
             if (provider.env) partial.env = provider.env
             if (provider.name) partial.name = provider.name

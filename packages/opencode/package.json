@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
-  "version": "3.0.35",
+  "version": "1.0.0",
   "name": "@costrict/cs",
   "type": "module",
   "license": "MIT",
@@ -23,7 +23,7 @@
     "db": "bun drizzle-kit"
   },
   "bin": {
-    "cs": "./bin/cs"
+    "dicode": "./bin/cs"
   },
   "randomField": "this-is-a-random-value-12345",
   "exports": {

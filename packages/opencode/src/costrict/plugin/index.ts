@@ -100,7 +100,7 @@ export async function CoStrictAuthPlugin(input: PluginInput): Promise<Hooks> {
                   const expiryDate = extractExpiryFromJWT(tokens.access_token)
                   const credentials = {
                     id: "opencode",
-                    name: "CoStrict Auth",
+                    name: "Dicode Auth",
                     access_token: tokens.access_token,
                     refresh_token: tokens.refresh_token,
                     state,

@@ -1,16 +1,10 @@
 import z from "zod"
 import { EOL } from "os"
 import { NamedError } from "@opencode-ai/util/error"
+import { logo as brand } from "./logo"
 
 export namespace UI {
-  const LOGO = [
-    [` ██████╗ ██████╗ `, `███████╗████████╗██████╗ ██╗ ██████╗████████╗`],
-    [`██╔════╝██╔═══██╗`, `██╔════╝╚══██╔══╝██╔══██╗██║██╔════╝╚══██╔══╝`],
-    [`██║     ██║   ██║`, `███████╗   ██║   ██████╔╝██║██║        ██║   `],
-    [`██║     ██║   ██║`, `╚════██║   ██║   ██╔══██╗██║██║        ██║   `],
-    [`╚██████╗╚██████╔╝`, `███████║   ██║   ██║  ██║██║╚██████╗   ██║   `],
-    [` ╚═════╝ ╚═════╝ `, `╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝ ╚═════╝   ╚═╝   `],
-  ]
+  const LOGO = brand.left.map((left, index) => [left, brand.right[index]])
 
   export const CancelledError = NamedError.create("UICancelledError", z.void())
 

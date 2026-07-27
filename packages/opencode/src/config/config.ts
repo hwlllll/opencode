@@ -322,7 +322,7 @@ export namespace Config {
       })
       if (!md) continue
 
-      const patterns = ["/.costrict/agent/", "/.costrict/agents/", "/agent/", "/agents/"]
+      const patterns = ["/.dicode/agent/", "/.dicode/agents/", "/agent/", "/agents/"]
       const file = rel(item, patterns) ?? path.basename(item)
       const agentName = trim(file)
 
@@ -1197,7 +1197,7 @@ export namespace Config {
   export class Service extends ServiceMap.Service<Service, Interface>()("@opencode/Config") {}
 
   function globalConfigFile() {
-    const candidates = ["costrict.jsonc", "costrict.json", "opencode.jsonc", "opencode.json", "config.json"].map(
+    const candidates = ["dicode.jsonc", "dicode.json", "opencode.jsonc", "opencode.json", "config.json"].map(
       (file) => path.join(Global.Path.config, file),
     )
     for (const file of candidates) {
@@ -1348,8 +1348,8 @@ export namespace Config {
             mergeDeep(yield* loadFile(path.join(Global.Path.config, "config.json"))),
             mergeDeep(yield* loadFile(path.join(Global.Path.config, "opencode.json"))),
             mergeDeep(yield* loadFile(path.join(Global.Path.config, "opencode.jsonc"))),
-            mergeDeep(yield* loadFile(path.join(Global.Path.config, "costrict.json"))),
-            mergeDeep(yield* loadFile(path.join(Global.Path.config, "costrict.jsonc"))),
+            mergeDeep(yield* loadFile(path.join(Global.Path.config, "dicode.json"))),
+            mergeDeep(yield* loadFile(path.join(Global.Path.config, "dicode.jsonc"))),
           )
 
           const legacy = path.join(Global.Path.config, "config")
@@ -1426,7 +1426,7 @@ export namespace Config {
               result = mergeConfigConcatArrays(result, yield* loadFile(file))
             }
             for (const file of yield* Effect.promise(() =>
-              ConfigPaths.projectFiles("costrict", ctx.directory, ctx.worktree),
+              ConfigPaths.projectFiles("dicode", ctx.directory, ctx.worktree),
             )) {
               result = mergeConfigConcatArrays(result, yield* loadFile(file))
             }

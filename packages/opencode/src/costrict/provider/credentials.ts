@@ -37,7 +37,7 @@ export interface CoStrictCredentials {
  */
 export function getCoStrictCredentialsPath(): string {
   const home = getCoStrictHomeDir()
-  return join(home, ".costrict", "share", "auth.json")
+  return join(home, ".dicode", "share", "auth.json")
 }
 
 /**
@@ -109,7 +109,7 @@ export async function saveCoStrictCredentials(
 ): Promise<void> {
   try {
     const filepath = getCoStrictCredentialsPath()
-    const dir = join(getCoStrictHomeDir(), ".costrict", "share")
+    const dir = join(getCoStrictHomeDir(), ".dicode", "share")
 
     // 确保目录存在
     await fs.mkdir(dir, { recursive: true, mode: 0o755 })

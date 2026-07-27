@@ -87,7 +87,7 @@ const AgentCreateCommand = cmd({
             scope = scopeResult
           }
           targetPath = path.join(
-            scope === "global" ? Global.Path.config : path.join(Instance.worktree, "..costrict"),
+            scope === "global" ? Global.Path.config : path.join(Instance.worktree, ".dicode"),
             "agent",
           )
         }

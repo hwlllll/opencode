@@ -1,9 +1,7 @@
 import { Hono } from "hono"
 import { describeRoute, validator, resolver } from "hono-openapi"
 import z from "zod"
-import { Config } from "../../config/config"
 import { Provider } from "../../provider/provider"
-import { ModelsDev } from "../../provider/models"
 import { ProviderAuth } from "../../provider/auth"
 import { ProviderID } from "../../provider/schema"
 import { mapValues } from "remeda"
@@ -126,26 +124,10 @@ export const ProviderRoutes = lazy(() =>
         },
       }),
       async (c) => {
-        const config = await Config.get()
-        const disabled = new Set(config.disabled_providers ?? [])
-        const enabled = config.enabled_providers ? new Set(config.enabled_providers) : undefined
-
-        const allProviders = await ModelsDev.get()
-        const filteredProviders: Record<string, (typeof allProviders)[string]> = {}
-        for (const [key, value] of Object.entries(allProviders)) {
-          if ((enabled ? enabled.has(key) : true) && !disabled.has(key)) {
-            filteredProviders[key] = value
-          }
-        }
-
         const connected = await Provider.list()
-        const providers = Object.assign(
-          mapValues(filteredProviders, (x) => Provider.fromModelsDevProvider(x)),
-          connected,
-        )
         return c.json({
-          all: Object.values(providers),
-          default: mapValues(providers, (item) => Provider.sort(Object.values(item.models))[0].id),
+          all: Object.values(connected),
+          default: mapValues(connected, (item) => Provider.sort(Object.values(item.models))[0].id),
           connected: Object.keys(connected),
         })
       },
@@ -172,23 +154,7 @@ export const ProviderRoutes = lazy(() =>
         },
       }),
       async (c) => {
-        const config = await Config.get()
-        const disabled = new Set(config.disabled_providers ?? [])
-        const enabled = config.enabled_providers ? new Set(config.enabled_providers) : undefined
-
-        const allProviders = await ModelsDev.get()
-        const filteredProviders: Record<string, (typeof allProviders)[string]> = {}
-        for (const [key, value] of Object.entries(allProviders)) {
-          if ((enabled ? enabled.has(key) : true) && !disabled.has(key)) {
-            filteredProviders[key] = value
-          }
-        }
-
         const connected = await Provider.list()
-        const providers = Object.assign(
-          mapValues(filteredProviders, (x) => Provider.fromModelsDevProvider(x)),
-          connected,
-        )
         return c.json({
           connected: Object.values(connected).map((item) => ({
             ...capability(item),

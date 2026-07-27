@@ -46,6 +46,9 @@ export function createDialogProviderOptions() {
         category: provider.id in PROVIDER_PRIORITY ? "Popular" : "Other",
         async onSelect() {
           try {
+            if (provider.source === "config" && typeof provider.options.apiKey === "string") {
+              return dialog.replace(() => <DialogModel providerID={provider.id} />)
+            }
             const methods = sync.data.provider_auth[provider.id] ?? [
               {
                 type: "api",

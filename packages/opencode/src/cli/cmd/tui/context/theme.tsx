@@ -489,7 +489,7 @@ async function getCustomThemes() {
     Global.Path.config,
     ...(await Array.fromAsync(
       Filesystem.up({
-        targets: [".costrict"],
+        targets: [".dicode"],
         start: process.cwd(),
       }),
     )),

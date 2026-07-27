@@ -3,11 +3,11 @@ import { Filesystem } from "@/util/filesystem"
 import path from "node:path"
 
 export function file() {
-  return path.join(Global.Path.home, ".costrict", "usage-queue.jsonl")
+  return path.join(Global.Path.home, ".dicode", "usage-queue.jsonl")
 }
 
 export function inflight() {
-  return path.join(Global.Path.home, ".costrict", "usage-inflight.jsonl")
+  return path.join(Global.Path.home, ".dicode", "usage-inflight.jsonl")
 }
 
 export type Report = {

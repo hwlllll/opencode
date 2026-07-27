@@ -122,8 +122,8 @@ function globalConfigPath() {
     "config.json",
     "opencode.json",
     "opencode.jsonc",
-    "costrict.json",
-    "costrict.jsonc",
+    "dicode.json",
+    "dicode.jsonc",
   ].map((file) => path.join(Global.Path.config, file))
 
   let lastExisting: string | undefined

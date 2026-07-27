@@ -24,7 +24,7 @@ function getCoStrictHomeDir(): string {
 }
 
 export function getDevicePath(): string {
-  return join(getCoStrictHomeDir(), ".costrict", "share", "device.json")
+  return join(getCoStrictHomeDir(), ".dicode", "share", "device.json")
 }
 
 export async function loadDevice(): Promise<DeviceInfo | null> {
@@ -38,7 +38,7 @@ export async function loadDevice(): Promise<DeviceInfo | null> {
 }
 
 async function saveDevice(info: DeviceInfo): Promise<void> {
-  const dir = join(getCoStrictHomeDir(), ".costrict", "share")
+  const dir = join(getCoStrictHomeDir(), ".dicode", "share")
   await fs.mkdir(dir, { recursive: true, mode: 0o755 })
   await fs.writeFile(getDevicePath(), JSON.stringify(info, null, 2), { encoding: "utf-8", mode: 0o600 })
 }

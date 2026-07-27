@@ -21,7 +21,7 @@ import * as CoStrictReview from "../costrict/review"
 
 export namespace Skill {
   const log = Log.create({ service: "skill" })
-  const EXTERNAL_DIRS = [".costrict", ".claude", ".agents"]
+  const EXTERNAL_DIRS = [".dicode", ".claude", ".agents"]
   const EXTERNAL_SKILL_PATTERN = "skills/**/SKILL.md"
   const OPENCODE_SKILL_PATTERN = "{skill,skills}/**/SKILL.md"
   const SKILL_PATTERN = "**/SKILL.md"

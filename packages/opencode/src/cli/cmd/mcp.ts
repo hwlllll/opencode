@@ -162,7 +162,7 @@ export const McpAuthCommand = cmd({
 
         if (oauthServers.length === 0) {
           prompts.log.warn("No OAuth-capable MCP servers configured")
-          prompts.log.info("Remote MCP servers support OAuth by default. Add a remote server in costrict.json:")
+          prompts.log.info("Remote MCP servers support OAuth by default. Add a remote server in dicode.json:")
           prompts.log.info(`
   "mcp": {
     "my-server": {
@@ -381,11 +381,11 @@ export const McpLogoutCommand = cmd({
 })
 
 async function resolveConfigPath(baseDir: string, global = false) {
-  // Check for existing config files (prefer .jsonc over .json, check .costrict/ subdirectory too)
-  const candidates = [path.join(baseDir, "costrict.json"), path.join(baseDir, "costrict.jsonc")]
+  // Check for existing config files (prefer .jsonc over .json, check .dicode/ subdirectory too)
+  const candidates = [path.join(baseDir, "dicode.json"), path.join(baseDir, "dicode.jsonc")]
 
   if (!global) {
-    candidates.push(path.join(baseDir, ".costrict", "costrict.json"), path.join(baseDir, ".costrict", "costrict.jsonc"))
+    candidates.push(path.join(baseDir, ".dicode", "dicode.json"), path.join(baseDir, ".dicode", "dicode.jsonc"))
   }
 
   for (const candidate of candidates) {
@@ -394,7 +394,7 @@ async function resolveConfigPath(baseDir: string, global = false) {
     }
   }
 
-  // Default to costrict.json if none exist
+  // Default to dicode.json if none exist
   return candidates[0]
 }
 

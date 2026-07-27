@@ -14,11 +14,11 @@ import { PackValidationError } from "./types"
 const log = Log.create({ service: "registry-install" })
 
 function projectConfigPath(): string {
-  return path.join(Instance.worktree, ".costrict", "costrict.json")
+  return path.join(Instance.worktree, ".dicode", "dicode.json")
 }
 
 function globalConfigPath(): string {
-  return path.join(Global.Path.config, "costrict.json")
+  return path.join(Global.Path.config, "dicode.json")
 }
 
 async function addSkillUrl(registryUrl: string, scope: InstallScope): Promise<void> {
@@ -74,7 +74,7 @@ export async function installSkill(
   const dest =
     scope === "global"
       ? path.join(Global.Path.config, "skills", item.slug)
-      : path.join(Instance.worktree, ".costrict", "skills", item.slug)
+      : path.join(Instance.worktree, ".dicode", "skills", item.slug)
   await Promise.all(item.files.map((f) => downloadFile(registryUrl,item.type, item.slug, f, dest, token)))
   await addSkillUrl(registryUrl, scope)
 }
@@ -88,7 +88,7 @@ export async function uninstallSkill(
   const dest =
     scope === "global"
       ? path.join(Global.Path.config, "skills", slug)
-      : path.join(Instance.worktree, ".costrict", "skills", slug)
+      : path.join(Instance.worktree, ".dicode", "skills", slug)
   const { rm } = await import("fs/promises")
   await rm(dest, { recursive: true, force: true })
   const allInstalled = await Filesystem.readJson<{ items: Array<{ slug: string; registry: string }> }>(
@@ -109,7 +109,7 @@ export async function installFileItem(
   const dir =
     scope === "global"
       ? path.join(Global.Path.config, item.type === "subagent" ? "agents" : "commands")
-      : path.join(Instance.worktree, ".costrict", item.type === "subagent" ? "agents" : "commands")
+      : path.join(Instance.worktree, ".dicode", item.type === "subagent" ? "agents" : "commands")
 
   await mkdir(dir, { recursive: true })
 
@@ -128,7 +128,7 @@ export async function uninstallFileItem(
   const dir =
     item.scope === "global"
       ? path.join(Global.Path.config, item.type === "subagent" ? "agent" : "commands")
-      : path.join(Instance.worktree, ".costrict", item.type === "subagent" ? "agent" : "commands")
+      : path.join(Instance.worktree, ".dicode", item.type === "subagent" ? "agent" : "commands")
 
   const candidates = [`${item.slug}.md`, item.slug]
   for (const name of candidates) {

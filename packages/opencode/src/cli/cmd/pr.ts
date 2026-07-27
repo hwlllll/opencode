@@ -82,15 +82,15 @@ export const PrCommand = cmd({
               })
             }
 
-            // Check for cs session link in PR body
+            // Check for Dicode session link in PR body
             if (prInfo && prInfo.body) {
               const sessionMatch = prInfo.body.match(/https:\/\/opncd\.ai\/s\/([a-zA-Z0-9_-]+)/)
               if (sessionMatch) {
                 const sessionUrl = sessionMatch[0]
-                UI.println(`Found cs session: ${sessionUrl}`)
+                UI.println(`Found Dicode session: ${sessionUrl}`)
                 UI.println(`Importing session...`)
 
-                const importResult = await Process.text(["cs", "import", sessionUrl], {
+                const importResult = await Process.text(["dicode", "import", sessionUrl], {
                   nothrow: true,
                 })
                 if (importResult.code === 0) {
@@ -112,10 +112,10 @@ export const PrCommand = cmd({
         UI.println("Starting CoStrict...")
         UI.println()
 
-        // Launch cs TUI with session ID if available
+        // Launch Dicode TUI with session ID if available
         const { spawn } = await import("child_process")
         const opencodeArgs = sessionId ? ["-s", sessionId] : []
-        const opencodeProcess = spawn("cs", opencodeArgs, {
+        const opencodeProcess = spawn("dicode", opencodeArgs, {
           stdio: "inherit",
           cwd: process.cwd(),
         })
@@ -123,7 +123,7 @@ export const PrCommand = cmd({
         await new Promise<void>((resolve, reject) => {
           opencodeProcess.on("exit", (code) => {
             if (code === 0) resolve()
-            else reject(new Error(`cs exited with code ${code}`))
+            else reject(new Error(`dicode exited with code ${code}`))
           })
           opencodeProcess.on("error", reject)
         })

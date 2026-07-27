@@ -31,11 +31,11 @@ export namespace ConfigPaths {
             }),
           )
         : []),
-      // CoStrict project discovery (overrides OpenCode)
+      // Dicode project discovery (overrides OpenCode)
       ...(!Flag.COSTRICT_DISABLE_PROJECT_CONFIG
         ? await Array.fromAsync(
             Filesystem.up({
-              targets: [".costrict"],
+              targets: [".dicode"],
               start: directory,
               stop: worktree,
             }),
@@ -50,7 +50,7 @@ export namespace ConfigPaths {
       )),
       ...(await Array.fromAsync(
         Filesystem.up({
-          targets: [".costrict"],
+          targets: [".dicode"],
           start: Global.Path.home,
           stop: Global.Path.home,
         }),

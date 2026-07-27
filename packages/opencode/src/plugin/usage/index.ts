@@ -32,7 +32,7 @@ async function enabled() {
 }
 
 async function ensure() {
-  await Filesystem.write(path.join(Global.Path.home, ".costrict", ".keep"), "")
+  await Filesystem.write(path.join(Global.Path.home, ".dicode", ".keep"), "")
 }
 
 async function ingest(msg: MessageV2.WithParts, dir: string) {

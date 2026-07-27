@@ -50,7 +50,7 @@ await Bun.file(mainPkgPath).write(
   JSON.stringify(
     {
       name: pkg.name,
-      bin: { cs: `./bin/cs` },
+      bin: { dicode: `./bin/cs` },
       scripts: {
         postinstall: "bun ./postinstall.mjs || node ./postinstall.mjs",
       },

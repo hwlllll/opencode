@@ -321,7 +321,7 @@ Generate a skill that:
       }
 
       // Create skill directory
-      const skillDir = path.join(Instance.directory, ".costrict", "skill", candidate.name)
+      const skillDir = path.join(Instance.directory, ".dicode", "skill", candidate.name)
       await Filesystem.write(path.join(skillDir, "SKILL.md"), candidate.content)
 
       // Update candidate status

@@ -301,7 +301,7 @@ export namespace Ripgrep {
 
     const root: Node = { name: "", children: new Map() }
     for (const file of files) {
-      if (file.includes("..costrict")) continue
+      if (file.includes("..dicode")) continue
       const parts = file.split(path.sep)
       if (parts.length < 2) continue
       let node = root

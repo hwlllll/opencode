@@ -18,7 +18,7 @@ import {
 
 function csCloudBin(): string {
   const ext = process.platform === "win32" ? ".exe" : ""
-  const binDir = path.join(os.homedir(), ".costrict", "bin")
+  const binDir = path.join(os.homedir(), ".dicode", "bin")
   return path.join(binDir, `cs-cloud${ext}`)
 }
 
