@@ -40,6 +40,7 @@ dicode upgrade
 cd remote-vcs-service
 export API_TOKEN='替换为强随机密钥'
 export PUBLIC_BASE_URL='https://download.example.com'
+export DICODE_BASE_URL='https://api.example.com'
 docker compose up --build -d
 ```
 
@@ -53,6 +54,7 @@ python -m venv .venv
 . .venv/bin/activate
 pip install -e '.[dev]'
 API_TOKEN=change-me PUBLIC_BASE_URL=http://localhost:8000 \
+  DICODE_BASE_URL=http://localhost:8000 \
   uvicorn app.main:app --reload
 ```
 
@@ -82,6 +84,34 @@ dicode-windows-arm64.zip
 ## 发布一个版本
 
 以下示例发布 `1.2.3`：
+
+### 一键构建并打包
+
+从仓库根目录运行：
+
+```bash
+DICODE_VERSION=1.2.3 \
+bun run build:dicode --target linux-x64-baseline
+```
+
+同时构建多个平台：
+
+```bash
+DICODE_VERSION=1.2.3 \
+bun run build:dicode \
+  --target linux-x64-baseline,linux-arm64,windows-x64-baseline
+```
+
+复用已有构建，只重新打包：
+
+```bash
+DICODE_VERSION=1.2.3 \
+bun run build:dicode --target linux-x64-baseline --skip-build
+```
+
+脚本只负责构建和 Dicode 标准命名压缩，不连接发布服务。
+
+### 手动上传
 
 ```bash
 base=http://localhost:8000
@@ -157,8 +187,22 @@ data/
 | 变量 | 说明 |
 | --- | --- |
 | `API_TOKEN` | 管理接口 Bearer Token；生产环境必须设置 |
-| `PUBLIC_BASE_URL` | 安装脚本和 manifest 使用的公开 HTTPS 地址 |
+| `PUBLIC_BASE_URL` | 安装脚本和安装包使用的公开下载地址 |
+| `DICODE_BASE_URL` | 安装后 CLI 使用的登录/API 地址；默认与下载地址相同 |
 | `DATA_DIR` | 数据目录，默认 `./data` |
 | `MAX_PACKAGE_BYTES` | 单个安装包最大字节数，默认 2 GiB |
 
 公开安装和下载接口不需要 Token，只有 `/api/*` 管理接口受保护。
+
+部署完成后，用户不需要设置任何环境变量：
+
+```bash
+curl -fsSL https://download.example.com/install.sh | bash
+```
+
+服务端会把两个地址写入动态生成的安装脚本。安装完成后：
+
+- `DICODE_DOWNLOAD_BASE_URL` 指向 `PUBLIC_BASE_URL`，用于升级和安装包下载。
+- `DICODE_BASE_URL` 指向服务后端，用于登录和 API。
+
+修改地址时只需更新服务端环境变量并重启发布服务；用户重新执行安装命令后会更新本地配置。

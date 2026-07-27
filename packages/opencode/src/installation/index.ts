@@ -158,13 +158,15 @@ export namespace Installation {
 
         const upgradeCurl = Effect.fnUntraced(
           function* (target: string) {
-            const baseUrl = Flag.COSTRICT_BASE_URL || "https://zgsm.sangfor.com"
+            const base = Flag.DICODE_DOWNLOAD_BASE_URL || Flag.COSTRICT_BASE_URL || "https://zgsm.sangfor.com"
 
             // Windows: use install.bat
             if (process.platform === "win32") {
-              const installBatUrl = Flag.COSTRICT_BASE_URL
-                ? `${Flag.COSTRICT_BASE_URL}/costrict-cli/install.bat`
-                : "https://costrict.ai/install.bat"
+              const installBatUrl = Flag.DICODE_DOWNLOAD_BASE_URL
+                ? `${base}/install.bat`
+                : Flag.COSTRICT_BASE_URL
+                  ? `${base}/costrict-cli/install.bat`
+                  : "https://costrict.ai/install.bat"
               const response = yield* httpOk.execute(
                 HttpClientRequest.get(installBatUrl),
               )
@@ -172,7 +174,7 @@ export namespace Installation {
               const bodyBytes = new TextEncoder().encode(body)
               const proc = ChildProcess.make("cmd", ["/c"], {
                 stdin: Stream.make(bodyBytes),
-                env: { VERSION: target, COSTRICT_BASE_URL: baseUrl },
+                env: { VERSION: target, DICODE_DOWNLOAD_BASE_URL: base },
                 extendEnv: true,
               })
               const handle = yield* spawner.spawn(proc)
@@ -185,9 +187,11 @@ export namespace Installation {
             }
 
             // Unix-like: use install.sh via bash
-            const installScriptUrl = Flag.COSTRICT_BASE_URL
-              ? `${Flag.COSTRICT_BASE_URL}/costrict-cli/install.sh`
-              : "https://costrict.ai/install.sh"
+            const installScriptUrl = Flag.DICODE_DOWNLOAD_BASE_URL
+              ? `${base}/install.sh`
+              : Flag.COSTRICT_BASE_URL
+                ? `${base}/costrict-cli/install.sh`
+                : "https://costrict.ai/install.sh"
             const response = yield* httpOk.execute(
               HttpClientRequest.get(installScriptUrl),
             )
@@ -195,7 +199,7 @@ export namespace Installation {
             const bodyBytes = new TextEncoder().encode(body)
             const proc = ChildProcess.make("bash", [], {
               stdin: Stream.make(bodyBytes),
-              env: { VERSION: target, COSTRICT_BASE_URL: baseUrl },
+              env: { VERSION: target, DICODE_DOWNLOAD_BASE_URL: base },
               extendEnv: true,
             })
             const handle = yield* spawner.spawn(proc)
@@ -312,9 +316,9 @@ export namespace Installation {
             return data.version
           }
 
-          const baseUrl = Flag.COSTRICT_BASE_URL || "https://zgsm.sangfor.com"
+          const base = Flag.DICODE_DOWNLOAD_BASE_URL || Flag.COSTRICT_BASE_URL || "https://zgsm.sangfor.com"
           const response = yield* httpOk.execute(
-            HttpClientRequest.get(`${baseUrl}/costrict-cli/pkg/latest.json`).pipe(
+            HttpClientRequest.get(`${base}/dicode/pkg/latest.json`).pipe(
               HttpClientRequest.acceptJson,
             ),
           )

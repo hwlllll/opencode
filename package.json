@@ -13,6 +13,7 @@
     "dev:web": "bun script/dev-web.ts",
     "dev:console": "ulimit -n 10240 2>/dev/null; bun run --cwd packages/console/app dev",
     "dev:storybook": "bun --cwd packages/storybook storybook",
+    "build:dicode": "bun ./script/package.ts",
     "typecheck": "bun turbo typecheck",
     "postinstall": "bun ./script/powershell.ts",
     "prepare": "husky",

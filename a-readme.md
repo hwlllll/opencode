@@ -186,12 +186,13 @@ bun --cwd packages/opencode run build:builtin-agents && bun --cwd packages/openc
   version=1.2.3
 
   上传 Linux：
-
+  base=http://0.0.0.0:8000
+  version=1.0.0
   curl -f -X PUT \
     -H "Authorization: Bearer 123456" \
     -H "Content-Type: application/octet-stream" \
-    --data-binary @dicode-linux-x64.tar.gz \
-    "$base/api/releases/$version/assets/dicode-linux-x64.tar.gz"
+    --data-binary @dicode-linux-x64-baseline.tar.gz \
+    "$base/api/releases/$version/assets/dicode-linux-x64-baseline.tar.gz"
 
   上传 Windows：
 
@@ -212,9 +213,10 @@ bun --cwd packages/opencode run build:builtin-agents && bun --cwd packages/openc
   上传完成但没有 publish 时，普通用户不能下载这个版本。
 
   查看版本：
-
+  base=http://0.0.0.0:8000
+  version=1.0.0
   curl -fsSL \
-    -H "Authorization: Bearer $token" \
+    -H "Authorization: Bearer 123456" \
     "$base/api/releases/$version"
 
   ## 5. 发布版本
@@ -251,7 +253,7 @@ bun --cwd packages/opencode run build:builtin-agents && bun --cwd packages/openc
 
   Linux/macOS：
 
-  curl -fsSL https://download.example.com/install.sh | bash
+  curl -fsSL http://0.0.0.0:8000/install.sh | bash
 
   Windows PowerShell：
 
@@ -319,3 +321,101 @@ bun --cwd packages/opencode run build:builtin-agents && bun --cwd packages/openc
   - 指定版本仍然可以安装 1.2.3
   - 历史安装包继续保留
   - 用户下次运行 dicode upgrade 时读取新的最新版本信息
+
+----------------------------------------------------------------------------
+    ### 1. 安装依赖
+
+  cd /workspaces/opencode
+  bun install
+
+  ### 2. 打包 Linux x64 基线版本
+
+  当前项目版本是 1.0.0：
+
+  bun run build:dicode \
+    --target linux-x64-baseline
+
+  也可以用环境变量：
+
+  DICODE_VERSION=1.0.0 \
+  bun run build:dicode --target linux-x64-baseline
+
+  生成文件：
+
+  packages/opencode/dist/1.0.0/dicode-linux-x64-baseline.tar.gz
+
+  ### 3. 同时打包多个平台
+
+  bun run build:dicode \
+    --version 1.0.0 \
+    --target linux-x64,linux-x64-baseline,linux-arm64,windows-x64-baseline
+
+  对应产物位于：
+
+  packages/opencode/dist/1.0.0/
+  ├── dicode-linux-x64.tar.gz
+  ├── dicode-linux-x64-baseline.tar.gz
+  ├── dicode-linux-arm64.tar.gz
+  └── dicode-windows-x64-baseline.zip
+
+  支持的目标包括：
+
+  linux-arm64
+  linux-x64
+  linux-x64-baseline
+  linux-arm64-musl
+  linux-x64-musl
+  linux-x64-baseline-musl
+  darwin-arm64
+  darwin-x64
+  darwin-x64-baseline
+  windows-arm64
+  windows-x64
+  windows-x64-baseline
+
+  ### 4. 仅重新压缩已有构建
+
+  如果二进制已经构建完成，不想重新编译：
+
+  bun run build:dicode \
+    --version 1.0.0 \
+    --target linux-x64-baseline \
+    --skip-build
+
+  ### 5. 本地验证产物
+
+  tmp=$(mktemp -d)
+  tar -xzf \
+    packages/opencode/dist/1.0.0/dicode-linux-x64-baseline.tar.gz \
+    -C "$tmp"
+  "$tmp/dicode" --version
+
+  正常应输出 1.0.0 等版本信息。
+
+  ### 6. 上传并发布
+
+  base=http://0.0.0.0:8000
+  token=123456
+  version=1.0.1
+  file=packages/opencode/dist/$version/dicode-linux-x64-baseline.tar.gz
+
+  curl -f -X PUT \
+    -H "Authorization: Bearer $token" \
+    -H "Content-Type: application/octet-stream" \
+    --data-binary "@$file" \
+    "$base/api/releases/$version/assets/dicode-linux-x64-baseline.tar.gz"
+
+  curl -f -X POST \
+    -H "Authorization: Bearer $token" \
+    "$base/api/releases/$version/publish"
+
+  检查发布结果：
+
+  curl -fsSL "$base/dicode/pkg/latest.json"
+
+  然后安装：
+
+  cd /workspaces/opencode
+  curl -fsSL "$base/install.sh" | bash
+
+  目前打包入口是 script/package.ts，对应命令定义在 package.json:13。这两个文件目前仍是未提交的新改动，正式使用前记得提交。

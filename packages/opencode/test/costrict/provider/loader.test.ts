@@ -96,14 +96,20 @@ test("createCoStrictCustomLoader: conditional refresh with refresh_token and inv
   }
 })
 
-test("getCoStrictBaseURL: env overrides credentials base_url for environment switch", () => {
+test("getCoStrictBaseURL: DICODE_BASE_URL takes priority", () => {
+  const dicode = process.env.DICODE_BASE_URL
   const previous = process.env.COSTRICT_BASE_URL
+  process.env.DICODE_BASE_URL = "https://dicode.example.com"
   process.env.COSTRICT_BASE_URL = "https://prod.example.com"
 
   try {
-    expect(getCoStrictBaseURL(undefined, "https://test.example.com")).toBe("https://prod.example.com")
-    expect(getCoStrictBaseURL("https://provider.example.com", "https://test.example.com")).toBe("https://prod.example.com")
+    expect(getCoStrictBaseURL(undefined, "https://test.example.com")).toBe("https://dicode.example.com")
+    expect(getCoStrictBaseURL("https://provider.example.com", "https://test.example.com")).toBe(
+      "https://dicode.example.com",
+    )
   } finally {
+    if (dicode === undefined) delete process.env.DICODE_BASE_URL
+    else process.env.DICODE_BASE_URL = dicode
     if (previous === undefined) delete process.env.COSTRICT_BASE_URL
     else process.env.COSTRICT_BASE_URL = previous
   }

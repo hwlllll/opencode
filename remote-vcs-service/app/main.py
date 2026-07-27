@@ -18,6 +18,7 @@ releases = root / "releases"
 latest = root / "latest"
 token = os.getenv("API_TOKEN")
 public = os.getenv("PUBLIC_BASE_URL", "").rstrip("/")
+backend = os.getenv("DICODE_BASE_URL", "").rstrip("/")
 limit = int(os.getenv("MAX_PACKAGE_BYTES", str(2 * 1024 * 1024 * 1024)))
 versions = re.compile(r"^[0-9][0-9A-Za-z.+-]{0,63}$")
 packages = re.compile(r"^dicode-[a-z0-9-]+\.(?:zip|tar\.gz)$")
@@ -81,6 +82,19 @@ def save(path: Path, data: dict) -> None:
 
 def base(request: Request) -> str:
     return public or str(request.base_url).rstrip("/")
+
+
+def service(request: Request) -> str:
+    return backend or base(request)
+
+
+def installer(request: Request, name: str) -> str:
+    return (
+        templates.joinpath(name)
+        .read_text()
+        .replace("__DOWNLOAD_BASE_URL__", base(request))
+        .replace("__DICODE_BASE_URL__", service(request))
+    )
 
 
 def manifest(request: Request, value: str) -> dict:
@@ -166,13 +180,13 @@ async def health():
 @app.get("/costrict-cli/install.sh", response_class=PlainTextResponse, include_in_schema=False)
 @app.get("/install.sh", response_class=PlainTextResponse)
 async def shell(request: Request):
-    return templates.joinpath("install.sh").read_text().replace("__BASE_URL__", base(request))
+    return installer(request, "install.sh")
 
 
 @app.get("/costrict-cli/install.bat", response_class=PlainTextResponse, include_in_schema=False)
 @app.get("/install.bat", response_class=PlainTextResponse)
 async def batch(request: Request):
-    return templates.joinpath("install.bat").read_text().replace("__BASE_URL__", base(request))
+    return installer(request, "install.bat")
 
 
 @app.get("/costrict-cli/pkg/latest.json", include_in_schema=False)

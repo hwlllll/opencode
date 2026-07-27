@@ -37,19 +37,30 @@ async def upload(app, value, name, content=b"package"):
 
 @pytest.mark.anyio
 async def test_health_and_installers(tmp_path, monkeypatch):
-    app = load(tmp_path, monkeypatch, PUBLIC_BASE_URL="https://download.example.com")
+    app = load(
+        tmp_path,
+        monkeypatch,
+        PUBLIC_BASE_URL="https://download.example.com",
+        DICODE_BASE_URL="https://api.example.com",
+    )
     response = await request(app, "GET", "/health")
     assert response.json() == {"status": "ok", "latest": None}
 
     shell = await request(app, "GET", "/install.sh")
-    assert 'base=${DICODE_BASE_URL:-"https://download.example.com"}' in shell.text
-    assert "${base}/dicode/pkg/latest.json" in shell.text
+    assert 'download=${DICODE_DOWNLOAD_BASE_URL:-"https://download.example.com"}' in shell.text
+    assert 'base=${DICODE_BASE_URL:-"https://api.example.com"}' in shell.text
+    assert "${download}/dicode/pkg/latest.json" in shell.text
+    assert 'export DICODE_BASE_URL=\\"$base\\"' in shell.text
+    assert 'export DICODE_DOWNLOAD_BASE_URL=\\"$download\\"' in shell.text
     assert "dicode upgrade" in shell.text
     assert "using baseline package" in shell.text
+    assert '(cd "$dir" && "$new" --version)' in shell.text
+    assert '(cd "$dir" && "$dir/dicode" --version)' in shell.text
     assert "costrict" not in shell.text.lower()
 
     batch = await request(app, "GET", "/install.bat")
-    assert "https://download.example.com" in batch.text
+    assert "DICODE_DOWNLOAD_BASE_URL=https://download.example.com" in batch.text
+    assert "DICODE_BASE_URL=https://api.example.com" in batch.text
     assert "dicode upgrade" in batch.text
     assert "costrict" not in batch.text.lower()
 

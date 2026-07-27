@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-base=${DICODE_BASE_URL:-"__BASE_URL__"}
+download=${DICODE_DOWNLOAD_BASE_URL:-"__DOWNLOAD_BASE_URL__"}
+base=${DICODE_BASE_URL:-"__DICODE_BASE_URL__"}
+download=${download%/}
 base=${base%/}
 version=${VERSION:-}
 modify=true
@@ -18,8 +20,8 @@ Usage: install.sh [options]
   -h, --help             Show this help
 
 Examples:
-  curl -fsSL ${base}/install.sh | bash
-  curl -fsSL ${base}/install.sh | bash -s -- --version 1.0.0
+  curl -fsSL ${download}/install.sh | bash
+  curl -fsSL ${download}/install.sh | bash -s -- --version 1.0.0
   dicode upgrade
 EOF
 }
@@ -90,14 +92,14 @@ tmp=$(mktemp -d "${TMPDIR:-/tmp}/dicode.XXXXXX")
 trap 'rm -rf "$tmp"' EXIT
 
 if [ -z "$version" ]; then
-  fetch "${base}/dicode/pkg/latest.json" "$tmp/latest.json"
+  fetch "${download}/dicode/pkg/latest.json" "$tmp/latest.json"
   version=$(sed -n 's/.*"tag_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$tmp/latest.json" | head -n 1)
   [ -n "$version" ] || die "latest version could not be determined"
 fi
 version=${version#v}
 
 archive="${target}.tar.gz"
-url="${base}/dicode/pkg/${version}/${archive}"
+url="${download}/dicode/pkg/${version}/${archive}"
 echo "Installing Dicode ${version} for ${os}/${arch}..."
 if ! fetch "$url" "$tmp/$archive" 2>/dev/null; then
   case "$target" in
@@ -112,7 +114,7 @@ if ! fetch "$url" "$tmp/$archive" 2>/dev/null; then
       ;;
   esac
   archive="${target}.tar.gz"
-  url="${base}/dicode/pkg/${version}/${archive}"
+  url="${download}/dicode/pkg/${version}/${archive}"
   echo "Optimized package unavailable; using baseline package..."
   fetch "$url" "$tmp/$archive" || die "failed to download ${archive}"
 fi
@@ -138,7 +140,7 @@ mkdir -p "$dir"
 new="$dir/.dicode.new.$$"
 cp "$binary" "$new"
 chmod 755 "$new"
-if ! "$new" --version >/dev/null 2>&1; then
+if ! (cd "$dir" && "$new" --version) >/dev/null 2>&1; then
   rm -f "$new"
   die "the downloaded executable failed its verification check"
 fi
@@ -146,7 +148,7 @@ if [ -f "$dir/dicode" ]; then
   mv "$dir/dicode" "$dir/dicode.old"
 fi
 mv "$new" "$dir/dicode"
-if ! "$dir/dicode" --version >/dev/null 2>&1; then
+if ! (cd "$dir" && "$dir/dicode" --version) >/dev/null 2>&1; then
   rm -f "$dir/dicode"
   if [ -f "$dir/dicode.old" ]; then
     mv "$dir/dicode.old" "$dir/dicode"
@@ -155,19 +157,28 @@ if ! "$dir/dicode" --version >/dev/null 2>&1; then
 fi
 rm -f "$dir/dicode.old"
 
-if [ "$modify" = true ] && ! printf '%s' ":$PATH:" | grep -Fq ":$dir:"; then
+if [ "$modify" = true ]; then
   case "${SHELL:-}" in
     */zsh) rc="$HOME/.zshrc" ;;
     */bash) rc="$HOME/.bashrc" ;;
     *) rc="$HOME/.profile" ;;
   esac
+  touch "$rc"
+  clean="$tmp/rc"
+  awk '
+    $0 == "# Dicode" { skip=1; next }
+    skip && /^export / { next }
+    { skip=0; print }
+  ' "$rc" > "$clean"
+  cp "$clean" "$rc"
   {
     echo
     echo "# Dicode"
     echo "export PATH=\"$dir:\$PATH\""
     echo "export DICODE_BASE_URL=\"$base\""
+    echo "export DICODE_DOWNLOAD_BASE_URL=\"$download\""
   } >> "$rc"
-  echo "Added Dicode to PATH in $rc"
+  echo "Updated Dicode configuration in $rc"
 fi
 
 echo "Dicode ${version} installed at $dir/dicode"

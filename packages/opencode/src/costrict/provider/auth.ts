@@ -49,7 +49,7 @@ export function generateState(): string {
  * @returns Base URL (不含尾部斜杠)
  */
 export function getCoStrictBaseURL(providerApi?: string, credentialsBaseUrl?: string): string {
-  const envUrl = process.env["COSTRICT_BASE_URL"]
+  const envUrl = process.env["DICODE_BASE_URL"] || process.env["COSTRICT_BASE_URL"]
   const defaultUrl = "https://zgsm.sangfor.com"
 
   const baseUrl = envUrl || providerApi || credentialsBaseUrl || defaultUrl
