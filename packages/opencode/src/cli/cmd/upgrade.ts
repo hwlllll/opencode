@@ -77,7 +77,7 @@ async function preUpgradeChecks(method: Installation.Method): Promise<boolean> {
 async function postUpgradeVerify(target: string): Promise<void> {
   try {
     const versionOutput = execSync(`"${process.execPath}" --version`, { encoding: "utf-8", timeout: 10000 }).trim()
-    // Extract version number (may include prefix like "cs v3.0.18" or just "3.0.18")
+    // Extract version number (may include prefix like "dicode v3.0.18" or just "3.0.18")
     const match = versionOutput.match(/(\d+\.\d+\.\d+)/)
     if (match) {
       const actual = match[1]
@@ -85,7 +85,7 @@ async function postUpgradeVerify(target: string): Promise<void> {
         prompts.log.success(`Successfully upgraded to ${target}`)
       } else {
         prompts.log.warn(`Upgrade may not have completed correctly. Expected ${target}, got ${actual}`)
-        prompts.log.info("Try restarting your terminal and running: cs --version")
+        prompts.log.info("Try restarting your terminal and running: dicode --version")
       }
     } else {
       prompts.log.success(`Upgrade to ${target} completed`)
@@ -93,7 +93,7 @@ async function postUpgradeVerify(target: string): Promise<void> {
   } catch {
     // Verification failed, but upgrade command itself succeeded
     prompts.log.success(`Upgrade to ${target} completed`)
-    prompts.log.info("Restart your terminal and verify with: cs --version")
+    prompts.log.info("Restart your terminal and verify with: dicode --version")
   }
 }
 
@@ -117,7 +117,7 @@ function handleUpgradeError(err: unknown, method: Installation.Method): void {
       if (isWindows) {
         prompts.log.info("Solution: Run the terminal as Administrator and try again")
       } else {
-        prompts.log.info("Solution: Try running with sudo, or use: cs upgrade --method=curl")
+        prompts.log.info("Solution: Try running with sudo, or use: dicode upgrade --method=curl")
       }
       return
     }
@@ -141,7 +141,7 @@ function handleUpgradeError(err: unknown, method: Installation.Method): void {
     // Package not found
     if (stderr.includes("404") || stderr.includes("not found") || stderr.includes("No formula")) {
       prompts.log.error("Package not found in registry")
-      prompts.log.info(`Solution: Try a different install method: cs upgrade --method=curl`)
+      prompts.log.info("Solution: Try a different install method: dicode upgrade --method=curl")
       return
     }
 
@@ -153,13 +153,13 @@ function handleUpgradeError(err: unknown, method: Installation.Method): void {
 
   // Fallback suggestion
   if (method !== "curl") {
-    prompts.log.info(`Tip: You can try upgrading with curl instead: cs upgrade --method=curl`)
+    prompts.log.info("Tip: You can try upgrading with curl instead: dicode upgrade --method=curl")
   }
 }
 
 export const UpgradeCommand = {
   command: "upgrade [target]",
-  describe: "upgrade cs to the latest or a specific version",
+  describe: "upgrade dicode to the latest or a specific version",
   builder: (yargs: Argv) => {
     return yargs
       .positional("target", {
@@ -181,7 +181,7 @@ export const UpgradeCommand = {
     const detectedMethod = await Installation.method()
     const method = (args.method as Installation.Method) ?? detectedMethod
     if (method === "unknown") {
-      prompts.log.error(`cs is installed to ${process.execPath} and may be managed by a package manager`)
+      prompts.log.error(`dicode is installed to ${process.execPath} and may be managed by a package manager`)
       const install = await prompts.select({
         message: "Install anyways?",
         options: [
@@ -205,7 +205,7 @@ export const UpgradeCommand = {
         prompts.log.error(err.message)
       }
       prompts.log.info(
-        "Please check your network connection or try specifying a version manually with: cs upgrade <version>",
+        "Please check your network connection or try specifying a version manually with: dicode upgrade <version>",
       )
       prompts.log.info("If behind a proxy, ensure HTTP_PROXY and HTTPS_PROXY environment variables are set")
       prompts.outro("Done")
@@ -213,7 +213,7 @@ export const UpgradeCommand = {
     }
 
     if (Installation.VERSION === target) {
-      prompts.log.warn(`cs upgrade skipped: ${target} is already installed`)
+      prompts.log.warn(`dicode upgrade skipped: ${target} is already installed`)
       prompts.outro("Done")
       return
     }
@@ -222,7 +222,7 @@ export const UpgradeCommand = {
     const versionComparison = Installation.compareVersions(target, Installation.VERSION)
     if (versionComparison < 0) {
       prompts.log.warn(
-        `cs upgrade skipped: current version ${Installation.VERSION} is newer than target ${target}. Downgrade is not allowed`,
+        `dicode upgrade skipped: current version ${Installation.VERSION} is newer than target ${target}. Downgrade is not allowed`,
       )
       prompts.log.info("If you need to use an older version, please reinstall manually")
       prompts.outro("Done")

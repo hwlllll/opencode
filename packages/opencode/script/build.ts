@@ -5,6 +5,8 @@ import fs from "fs"
 import path from "path"
 import { fileURLToPath } from "url"
 import { createSolidTransformPlugin } from "@opentui/solid/bun-plugin"
+import { VERSION as version, TARGETS as platforms, archive } from "../src/file/ripgrep-release"
+import { downloadWithFallback } from "../src/file/costrict/download-manager"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -161,12 +163,7 @@ const allTargets: {
 ]
 
 const label = (item: (typeof allTargets)[number]) =>
-  [
-    item.os === "win32" ? "windows" : item.os,
-    item.arch,
-    item.avx2 === false ? "baseline" : undefined,
-    item.abi,
-  ]
+  [item.os === "win32" ? "windows" : item.os, item.arch, item.avx2 === false ? "baseline" : undefined, item.abi]
     .filter(Boolean)
     .join("-")
 
@@ -201,6 +198,36 @@ const targets = wanted
 
 await $`rm -rf dist`
 
+const cache = new Map<string, Promise<ArrayBuffer>>()
+
+async function ripgrep(item: (typeof allTargets)[number], name: string) {
+  const key = `${item.arch}-${item.os}` as keyof typeof platforms
+  const cfg = platforms[key]
+  if (!cfg) throw new Error(`Unsupported ripgrep target: ${key}`)
+  const file = archive(key)
+  const dest = path.join(dir, "dist", name, "bin", file)
+  const root = process.env.COSTRICT_RIPGREP_DIR
+  if (root) {
+    const src = path.join(root, file)
+    if (!fs.existsSync(src)) throw new Error(`Missing offline ripgrep archive: ${src}`)
+    await fs.promises.copyFile(src, dest)
+    return dest
+  }
+  const url = `https://github.com/BurntSushi/ripgrep/releases/download/${version}/${file}`
+  const task =
+    cache.get(file) ??
+    downloadWithFallback(url, {
+      version,
+      filename: file,
+      platform: cfg.platform,
+      extension: cfg.extension,
+      processPlatformKey: key,
+    })
+  cache.set(file, task)
+  await Bun.write(dest, await task)
+  return dest
+}
+
 const binaries: Record<string, string> = {}
 if (!skipInstall) {
   await $`bun install --os="*" --cpu="*" @opentui/core@${pkg.dependencies["@opentui/core"]}`
@@ -219,6 +246,12 @@ for (const item of targets) {
     .join("-")
   console.log(`building ${name}`)
   await $`mkdir -p dist/${name}/bin`
+  const packed = await ripgrep(item, name)
+  const spec = path.relative(dir, packed).replaceAll("\\", "/")
+  const embedded = [
+    `import file from ${JSON.stringify(spec.startsWith(".") ? spec : `./${spec}`)} with { type: "file" };`,
+    `export default file;`,
+  ].join("\n")
 
   const localPath = path.resolve(dir, "node_modules/@opentui/core/parser.worker.js")
   const rootPath = path.resolve(dir, "../../node_modules/@opentui/core/parser.worker.js")
@@ -245,8 +278,15 @@ for (const item of targets) {
     },
     files: {
       ...(embeddedFileMap ? { "opencode-web-ui.gen.ts": embeddedFileMap } : {}),
+      "opencode-ripgrep.gen.ts": embedded,
     },
-    entrypoints: ["./src/index.ts", parserWorker, workerPath, ...(embeddedFileMap ? ["opencode-web-ui.gen.ts"] : [])],
+    entrypoints: [
+      "./src/index.ts",
+      parserWorker,
+      workerPath,
+      "opencode-ripgrep.gen.ts",
+      ...(embeddedFileMap ? ["opencode-web-ui.gen.ts"] : []),
+    ],
     define: {
       COSTRICT_VERSION: `'${Script.version}'`,
       COSTRICT_COMMIT_HASH: `'${Script.commitHash}'`,

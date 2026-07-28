@@ -50,10 +50,12 @@ process.env["OPENCODE_DISABLE_DEFAULT_PLUGINS"] = "true"
 const cacheDir = path.join(dir, "cache", "opencode")
 await fs.mkdir(cacheDir, { recursive: true })
 await fs.writeFile(path.join(cacheDir, "version"), "14")
-const url = process.env.OPENCODE_MODELS_URL || "https://models.dev"
-const response = await fetch(`${url}/api.json`)
-if (response.ok) {
-  await fs.writeFile(path.join(cacheDir, "models.json"), await response.text())
+if (!["true", "1"].includes(process.env.COSTRICT_OFFLINE?.toLowerCase() ?? "")) {
+  const url = process.env.OPENCODE_MODELS_URL || "https://models.dev"
+  const response = await fetch(`${url}/api.json`)
+  if (response.ok) {
+    await fs.writeFile(path.join(cacheDir, "models.json"), await response.text())
+  }
 }
 // Disable models.dev refresh to avoid race conditions during tests
 process.env["COSTRICT_DISABLE_MODELS_FETCH"] = "true"

@@ -13,9 +13,14 @@ import { text } from "node:stream/consumers"
 
 import { ZipReader, BlobReader, BlobWriter } from "@zip.js/zip.js"
 import { Log } from "@/util/log"
+import { Flag } from "@/flag/flag"
+import { VERSION, TARGETS, archive } from "./ripgrep-release"
 /*costrict change*/
 import { downloadWithFallback } from "./costrict/download-manager"
 /*costrict change*/
+
+// @ts-expect-error - generated file at build time
+const embedded = import("opencode-ripgrep.gen.ts").then((module) => module.default as string).catch(() => undefined)
 
 export namespace Ripgrep {
   const log = Log.create({ service: "ripgrep" })
@@ -95,18 +100,6 @@ export namespace Ripgrep {
   export type Begin = z.infer<typeof Begin>
   export type End = z.infer<typeof End>
   export type Summary = z.infer<typeof Summary>
-  const PLATFORM = {
-    "arm64-darwin": { platform: "aarch64-apple-darwin", extension: "tar.gz" },
-    "arm64-linux": {
-      platform: "aarch64-unknown-linux-gnu",
-      extension: "tar.gz",
-    },
-    "x64-darwin": { platform: "x86_64-apple-darwin", extension: "tar.gz" },
-    "x64-linux": { platform: "x86_64-unknown-linux-musl", extension: "tar.gz" },
-    "arm64-win32": { platform: "aarch64-pc-windows-msvc", extension: "zip" },
-    "x64-win32": { platform: "x86_64-pc-windows-msvc", extension: "zip" },
-  } as const
-
   export const ExtractionFailedError = NamedError.create(
     "RipgrepExtractionFailedError",
     z.object({
@@ -130,32 +123,59 @@ export namespace Ripgrep {
     }),
   )
 
+  export const UnavailableError = NamedError.create(
+    "RipgrepUnavailableError",
+    z.object({
+      path: z.string(),
+    }),
+  )
+
+  export function bundled(root = path.dirname(process.execPath), key = `${process.arch}-${process.platform}`) {
+    const config = TARGETS[key as keyof typeof TARGETS]
+    if (!config) return
+    return path.join(root, archive(key as keyof typeof TARGETS))
+  }
+
   const state = lazy(async () => {
+    const filepath = path.join(Global.Path.bin, "rg" + (process.platform === "win32" ? ".exe" : ""))
     const system = which("rg")
     if (system) {
       const stat = await fs.stat(system).catch(() => undefined)
-      if (stat?.isFile()) return { filepath: system }
+      if (stat?.isFile() && path.resolve(system) !== path.resolve(filepath)) return { filepath: system }
+      if (stat?.isFile()) {
+        const proc = Process.spawn([system, "--version"], {
+          stderr: "ignore",
+          stdout: "ignore",
+        })
+        if ((await proc.exited) === 0) return { filepath: system }
+        await fs.unlink(system).catch(() => undefined)
+      }
       log.warn("bun.which returned invalid rg path", { filepath: system })
     }
-    const filepath = path.join(Global.Path.bin, "rg" + (process.platform === "win32" ? ".exe" : ""))
 
     if (!(await Filesystem.exists(filepath))) {
-      const platformKey = `${process.arch}-${process.platform}` as keyof typeof PLATFORM
-      const config = PLATFORM[platformKey]
+      const platformKey = `${process.arch}-${process.platform}` as keyof typeof TARGETS
+      const config = TARGETS[platformKey]
       if (!config) throw new UnsupportedPlatformError({ platform: platformKey })
 
-      const version = "14.1.1"
-      const filename = `ripgrep-${version}-${config.platform}.${config.extension}`
-      const url = `https://github.com/BurntSushi/ripgrep/releases/download/${version}/${filename}`
+      const filename = archive(platformKey)
+      const url = `https://github.com/BurntSushi/ripgrep/releases/download/${VERSION}/${filename}`
+      const packed = bundled()
 
       /*costrict change*/
-      const arrayBuffer = await downloadWithFallback(url, {
-        version,
-        filename,
-        platform: config.platform,
-        extension: config.extension,
-        processPlatformKey: platformKey,
-      })
+      const arrayBuffer = await (async () => {
+        const resource = await embedded
+        if (resource && (await Filesystem.exists(resource))) return Bun.file(resource).arrayBuffer()
+        if (packed && (await Filesystem.exists(packed))) return Bun.file(packed).arrayBuffer()
+        if (Flag.COSTRICT_OFFLINE) throw new UnavailableError({ path: packed ?? filename })
+        return downloadWithFallback(url, {
+          version: VERSION,
+          filename,
+          platform: config.platform,
+          extension: config.extension,
+          processPlatformKey: platformKey,
+        })
+      })()
       /*costrict change*/
 
       const archivePath = path.join(Global.Path.bin, filename)

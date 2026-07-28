@@ -13,7 +13,6 @@ import {
   onMount,
   batch,
   Show,
-  on,
   onCleanup,
 } from "solid-js"
 import { win32DisableProcessedInput, win32InstallCtrlCGuard } from "./win32"
@@ -171,6 +170,7 @@ export function tui(input: {
   fetch?: typeof fetch
   headers?: RequestInit["headers"]
   events?: EventSource
+  ready?: () => void
 }) {
   // promise to prevent immediate exit
   return new Promise<void>(async (resolve) => {
@@ -224,7 +224,7 @@ export function tui(input: {
                                       <FrecencyProvider>
                                         <PromptHistoryProvider>
                                           <PromptRefProvider>
-                                            <App onSnapshot={input.onSnapshot} />
+                                            <App onSnapshot={input.onSnapshot} ready={input.ready} />
                                           </PromptRefProvider>
                                         </PromptHistoryProvider>
                                       </FrecencyProvider>
@@ -248,7 +248,7 @@ export function tui(input: {
   })
 }
 
-function App(props: { onSnapshot?: () => Promise<string[]> }) {
+function App(props: { onSnapshot?: () => Promise<string[]>; ready?: () => void }) {
   const tuiConfig = useTuiConfig()
   const route = useRoute()
   const dimensions = useTerminalDimensions()
@@ -428,17 +428,6 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
       }
     })
   })
-
-  createEffect(
-    on(
-      () => sync.status === "complete" && sync.data.provider.length === 0,
-      (isEmpty, wasEmpty) => {
-        // only trigger when we transition into an empty-provider state
-        if (!isEmpty || wasEmpty) return
-        dialog.replace(() => <DialogProviderList />)
-      },
-    ),
-  )
 
   const connected = useConnected()
   command.register(() => [
@@ -841,6 +830,13 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
 
   sdk.event.on(TuiEvent.CommandExecute.type, (evt) => {
     command.trigger(evt.properties.command)
+  })
+
+  let checked = false
+  sdk.event.on("server.connected", () => {
+    if (checked) return
+    checked = true
+    props.ready?.()
   })
 
   sdk.event.on(TuiEvent.ToastShow.type, (evt) => {

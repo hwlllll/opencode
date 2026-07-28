@@ -22,3 +22,13 @@ test("server picker dialog opens from home", async ({ page }) => {
   await expect(dialog).toBeVisible()
   await expect(dialog.getByRole("textbox").first()).toBeVisible()
 })
+
+test("project picker opens from home", async ({ page }) => {
+  await page.goto("/")
+
+  await page.getByRole("button", { name: "Open project" }).first().click()
+
+  const dialog = page.getByRole("dialog", { name: "Open project" })
+  await expect(dialog).toBeVisible()
+  await expect(dialog.getByRole("textbox")).toBeVisible()
+})

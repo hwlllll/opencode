@@ -43,7 +43,11 @@ function createWorkerFetch(client: RpcClient): typeof fetch {
 
 function createEventSource(client: RpcClient): EventSource {
   return {
-    on: (handler) => client.on<Event>("event", handler),
+    on: (handler) => {
+      const unsub = client.on<Event>("event", handler)
+      void client.call("setWorkspace", { workspaceID: undefined })
+      return unsub
+    },
     setWorkspace: (workspaceID) => {
       void client.call("setWorkspace", { workspaceID })
     },
@@ -196,10 +200,6 @@ export const TuiThreadCommand = cmd({
             events: createEventSource(client),
           }
 
-      setTimeout(() => {
-        client.call("checkUpgrade", { directory: cwd }).catch(() => {})
-      }, 1000).unref?.()
-
       try {
         await tui({
           url: transport.url,
@@ -212,6 +212,11 @@ export const TuiThreadCommand = cmd({
           directory: cwd,
           fetch: transport.fetch,
           events: transport.events,
+          ready: () => {
+            void client.call("checkUpgrade", { directory: cwd }).catch((err) => {
+              Log.Default.warn("upgrade check failed", { error: errorMessage(err) })
+            })
+          },
           args: {
             continue: args.continue,
             sessionID: args.session,

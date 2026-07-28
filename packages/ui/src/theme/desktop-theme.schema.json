@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://opencode.ai/desktop-theme.json",
-  "title": "CoStrict Desktop Theme",
-  "description": "A theme definition for the CoStrict desktop application",
+  "title": "Dicode Desktop Theme",
+  "description": "A theme definition for the Dicode desktop application",
   "type": "object",
   "required": ["name", "id", "light", "dark"],
   "properties": {

@@ -50,6 +50,13 @@ export namespace BunProc {
     }),
   )
 
+  export const OfflineError = NamedError.create(
+    "BunOfflineError",
+    z.object({
+      pkg: z.string(),
+    }),
+  )
+
   export async function install(pkg: string, version = "latest", opts?: { ignoreScripts?: boolean }) {
     // Use lock to ensure only one install at a time
     using _ = await Lock.write("bun-install")
@@ -65,6 +72,8 @@ export namespace BunProc {
     const dependencies = parsed.dependencies
     const modExists = await Filesystem.exists(mod)
     const cachedVersion = dependencies[pkg]
+
+    if ((!modExists || !cachedVersion) && !online()) throw new OfflineError({ pkg })
 
     if (!modExists || !cachedVersion) {
       // continue to install

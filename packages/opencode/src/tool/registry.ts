@@ -171,6 +171,7 @@ export namespace ToolRegistry {
         const state = yield* InstanceState.get(cache)
         const allTools = yield* all(state.custom)
         const filtered = allTools.filter((tool) => {
+          if (Flag.COSTRICT_OFFLINE && ["webfetch", "websearch", "codesearch"].includes(tool.id)) return false
           if (tool.id === "codesearch" || tool.id === "websearch") {
             return model.providerID === ProviderID.opencode || Flag.OPENCODE_ENABLE_EXA
           }

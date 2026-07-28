@@ -1,4 +1,4 @@
 {
-  "api": "http://localhost:8000",
+  "api": "https://dicode.byd.com:39081",
   "download": "http://localhost:8000"
 }

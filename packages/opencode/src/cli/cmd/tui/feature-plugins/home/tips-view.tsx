@@ -111,7 +111,7 @@ const TIPS = [
   "Use {highlight}--format json{/highlight} for machine-readable output in scripts",
   "Run {highlight}dicode serve{/highlight} for headless API access to Dicode",
   "Use {highlight}dicode run --attach{/highlight} to connect to a running server",
-  "Run {highlight}cs upgrade{/highlight} to update to the latest version",
+  "Run {highlight}dicode upgrade{/highlight} to update to the latest version",
   "Run {highlight}cs auth list{/highlight} to see all configured providers",
   "Run {highlight}cs agent create{/highlight} for guided agent creation",
   "Use {highlight}/cs{/highlight} in GitHub issues/PRs to trigger AI actions",

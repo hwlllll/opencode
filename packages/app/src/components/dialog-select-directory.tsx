@@ -191,6 +191,12 @@ function useDirectorySearch(args: {
     const isPath = raw.startsWith("~") || !!rootOf(raw) || raw.includes("/")
     const query = normalizeDriveRoot(scopedInput.path)
 
+    if (!value) {
+      const results = await dirs(scopedInput.directory)
+      if (!active()) return []
+      return results.map((item) => item.absolute).slice(0, 50)
+    }
+
     const find = () =>
       args.sdk.client.find
         .files({ directory: scopedInput.directory, query, type: "directory", limit: 50 })

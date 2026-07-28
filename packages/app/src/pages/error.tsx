@@ -305,7 +305,7 @@ export const ErrorPage: Component<ErrorPageProps> = (props) => {
         </Show>
         <div class="flex flex-col items-center gap-2">
           <div class="flex items-center justify-center gap-1">
-            Please report this error to the CoStrict team
+            Please report this error to the Dicode team
             <button
               type="button"
               class="flex items-center text-text-interactive-base gap-1"

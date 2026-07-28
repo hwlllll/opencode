@@ -3,8 +3,17 @@ import fs from "fs/promises"
 import path from "path"
 import { tmpdir } from "../fixture/fixture"
 import { Ripgrep } from "../../src/file/ripgrep"
+import { archive } from "../../src/file/ripgrep-release"
 
 describe("file.ripgrep", () => {
+  test("resolves bundled archive beside executable", () => {
+    expect(Ripgrep.bundled("/opt/costrict/bin", "x64-linux")).toBe(path.join("/opt/costrict/bin", archive("x64-linux")))
+  })
+
+  test("ignores bundled archive on unsupported platform", () => {
+    expect(Ripgrep.bundled("/opt/costrict/bin", "x64-freebsd")).toBeUndefined()
+  })
+
   test("defaults to include hidden", async () => {
     await using tmp = await tmpdir({
       init: async (dir) => {

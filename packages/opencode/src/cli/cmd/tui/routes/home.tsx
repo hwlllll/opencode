@@ -9,6 +9,8 @@ import { useRouteData } from "@tui/context/route"
 import { usePromptRef } from "../context/prompt"
 import { useLocal } from "../context/local"
 import { TuiPluginRuntime } from "../plugin"
+import { useConnected } from "../component/dialog-model"
+import { useTheme } from "../context/theme"
 
 // TODO: what is the best way to do this?
 let once = false
@@ -24,6 +26,8 @@ export function Home() {
   let prompt: PromptRef | undefined
   const args = useArgs()
   const local = useLocal()
+  const connected = useConnected()
+  const { theme } = useTheme()
 
   const isFirstTimeUser = createMemo(() => sync.data.session.length === 0)
 
@@ -64,6 +68,23 @@ export function Home() {
           </TuiPluginRuntime.Slot>
         </box>
         <box height={1} minHeight={0} flexShrink={1} />
+        <Show when={sync.ready && !connected()}>
+          <box
+            width="100%"
+            maxWidth={75}
+            flexShrink={0}
+            alignItems="center"
+            backgroundColor={theme.backgroundElement}
+            paddingTop={1}
+            paddingBottom={1}
+          >
+            <text fg={theme.warning}>
+              <b>尚未连接模型供应商</b>
+            </text>
+            <text fg={theme.text}>输入 /connect 选择供应商并登录</text>
+          </box>
+          <box height={1} flexShrink={0} />
+        </Show>
         <box width="100%" maxWidth={75} zIndex={1000} paddingTop={1} flexShrink={0}>
           <TuiPluginRuntime.Slot name="home_prompt" mode="replace" workspace_id={route.workspaceID}>
             <Prompt

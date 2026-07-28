@@ -12,7 +12,11 @@ import * as fuzzysort from "fuzzysort"
 export function useConnected() {
   const sync = useSync()
   return createMemo(() =>
-    sync.data.provider.some((x) => x.id !== "opencode" || Object.values(x.models ?? {}).some((y) => y.cost?.input !== 0)),
+    sync.data.provider.some((x) => {
+      if (x.id === "costrict") return !!x.key
+      if (x.id !== "opencode") return true
+      return Object.values(x.models ?? {}).some((y) => y.cost?.input !== 0)
+    }),
   )
 }
 

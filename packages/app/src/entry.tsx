@@ -67,7 +67,7 @@ const notify: Platform["notify"] = async (title, description, href) => {
 
   const notification = new Notification(title, {
     body: description ?? "",
-    icon: "https://opencode.ai/favicon-96x96-v3.png",
+    icon: "/favicon.svg",
   })
 
   notification.onclick = () => {
@@ -110,9 +110,20 @@ const getDefaultUrl = () => {
   return getCurrentUrl()
 }
 
+const getVersion = async () => {
+  const data = await fetch(new URL("/global/health", getCurrentUrl()))
+    .then((res) => (res.ok ? res.json() : undefined))
+    .catch(() => undefined)
+  if (!data || typeof data !== "object" || !("version" in data) || typeof data.version !== "string") return pkg.version
+  return data.version
+}
+
+const version = await getVersion()
+document.title = `Dicode ${version}`
+
 const platform: Platform = {
   platform: "web",
-  version: pkg.version,
+  version,
   openLink,
   back,
   forward,
