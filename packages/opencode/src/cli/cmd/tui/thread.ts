@@ -200,6 +200,19 @@ export const TuiThreadCommand = cmd({
             events: createEventSource(client),
           }
 
+      let checked = false
+      let timer: Timer | undefined
+      const check = () => {
+        if (checked) return
+        checked = true
+        if (timer) clearTimeout(timer)
+        void client.call("checkUpgrade", { directory: cwd }).catch((err) => {
+          Log.Default.warn("upgrade check failed", { error: errorMessage(err) })
+        })
+      }
+      timer = setTimeout(check, 3000)
+      timer.unref?.()
+
       try {
         await tui({
           url: transport.url,
@@ -212,11 +225,7 @@ export const TuiThreadCommand = cmd({
           directory: cwd,
           fetch: transport.fetch,
           events: transport.events,
-          ready: () => {
-            void client.call("checkUpgrade", { directory: cwd }).catch((err) => {
-              Log.Default.warn("upgrade check failed", { error: errorMessage(err) })
-            })
-          },
+          ready: check,
           args: {
             continue: args.continue,
             sessionID: args.session,
@@ -227,6 +236,7 @@ export const TuiThreadCommand = cmd({
           },
         })
       } finally {
+        if (timer) clearTimeout(timer)
         await stop()
       }
     } finally {

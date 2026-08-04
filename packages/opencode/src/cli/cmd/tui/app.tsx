@@ -17,7 +17,6 @@ import {
 } from "solid-js"
 import { win32DisableProcessedInput, win32InstallCtrlCGuard } from "./win32"
 import { Flag } from "@/flag/flag"
-import semver from "semver"
 import { DialogProvider, useDialog } from "@tui/ui/dialog"
 import { DialogProvider as DialogProviderList } from "@tui/component/dialog-provider"
 import { ErrorComponent } from "@tui/component/error-component"
@@ -881,7 +880,7 @@ function App(props: { onSnapshot?: () => Promise<string[]>; ready?: () => void }
     const version = evt.properties.version
 
     const skipped = kv.get("skipped_version")
-    if (skipped && !semver.gt(version, skipped)) return
+    if (skipped === version) return
 
     const choice = await DialogConfirm.show(
       dialog,

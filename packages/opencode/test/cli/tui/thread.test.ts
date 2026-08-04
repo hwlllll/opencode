@@ -15,6 +15,7 @@ const stop = new Error("stop")
 const seen = {
   tui: [] as string[],
   inst: [] as string[],
+  call: [] as string[],
 }
 
 function setup() {
@@ -25,10 +26,14 @@ function setup() {
   // https://github.com/oven-sh/bun/issues/7823 and #12823.
   spyOn(App, "tui").mockImplementation(async (input) => {
     if (input.directory) seen.tui.push(input.directory)
+    input.ready?.()
     throw stop
   })
   spyOn(Rpc, "client").mockImplementation(() => ({
-    call: async () => ({ url: "http://127.0.0.1" }) as never,
+    call: async (method) => {
+      seen.call.push(String(method))
+      return { url: "http://127.0.0.1" } as never
+    },
     on: () => () => {},
   }))
   spyOn(UI, "error").mockImplementation(() => {})
@@ -90,6 +95,7 @@ describe("tui thread", () => {
     const type = process.platform === "win32" ? "junction" : "dir"
     seen.tui.length = 0
     seen.inst.length = 0
+    seen.call.length = 0
     await fs.symlink(tmp.path, link, type)
 
     Object.defineProperty(process.stdin, "isTTY", {
@@ -110,6 +116,7 @@ describe("tui thread", () => {
       await expect(call(project)).rejects.toBe(stop)
       expect(seen.inst[0]).toBe(tmp.path)
       expect(seen.tui[0]).toBe(tmp.path)
+      expect(seen.call.filter((method) => method === "checkUpgrade")).toHaveLength(1)
     } finally {
       process.chdir(cwd)
       if (pwd === undefined) delete process.env.PWD

@@ -13,6 +13,7 @@ import { Flag } from "@/flag/flag"
 import { setTimeout as sleep } from "node:timers/promises"
 import { writeHeapSnapshot } from "node:v8"
 import { WorkspaceID } from "@/control-plane/schema"
+import { relay } from "./util/relay"
 
 await Log.init({
   print: process.argv.includes("--print-logs"),
@@ -58,33 +59,20 @@ const startEventStream = (input: { directory: string; workspaceID?: string }) =>
         directory: input.directory,
         init: InstanceBootstrap,
         fn: () =>
-          new Promise<boolean>((resolve) => {
-            Rpc.emit("event", {
-              type: "server.connected",
-              properties: {},
-            } satisfies Event)
-
-            let settled = false
-            const settle = (value: boolean) => {
-              if (settled) return
-              settled = true
-              signal.removeEventListener("abort", onAbort)
-              unsub()
-              resolve(value)
-            }
-
-            const unsub = Bus.subscribeAll((event) => {
+          relay<Event>({
+            signal,
+            active: () => eventStream.abort === abort,
+            open: (handler) => {
+              Rpc.emit("event", {
+                type: "server.connected",
+                properties: {},
+              } satisfies Event)
+              return Bus.subscribeAll(handler)
+            },
+            event: (event) => {
               Rpc.emit("event", event as Event)
-              if (event.type === Bus.InstanceDisposed.type) {
-                settle(true)
-              }
-            })
-
-            const onAbort = () => {
-              settle(false)
-            }
-
-            signal.addEventListener("abort", onAbort, { once: true })
+              return event.type === Bus.InstanceDisposed.type
+            },
           }),
       }).catch((error) => {
         Log.Default.error("event stream subscribe error", {
@@ -143,9 +131,7 @@ export const rpc = {
     await Instance.provide({
       directory: input.directory,
       init: InstanceBootstrap,
-      fn: async () => {
-        await upgrade().catch(() => {})
-      },
+      fn: () => upgrade(),
     })
   },
   async reload() {

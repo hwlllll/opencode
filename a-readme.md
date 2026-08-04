@@ -353,8 +353,7 @@ bun --cwd packages/opencode run build:builtin-agents && bun --cwd packages/openc
   ### 3. 同时打包多个平台
 
   bun run build:dicode \
-    --version 1.0.0 \
-    --target linux-x64,linux-x64-baseline,linux-arm64,windows-x64-baseline
+    --target linux-x64,linux-x64-baseline,windows-x64,windows-x64-baseline
 
   对应产物位于：
 
@@ -425,3 +424,4 @@ bun --cwd packages/opencode run build:builtin-agents && bun --cwd packages/openc
   curl -fsSL "$base/install.sh" | bash
 
   目前打包入口是 script/package.ts，对应命令定义在 package.json:13。这两个文件目前仍是未提交的新改动，正式使用前记得提交。
+$env:DICODE_INSTALL_DIR="$env:LOCALAPPDATA\dicode\bin"; iwr "https://aiservice.byd.com/dicode-remote-update/install.bat" -OutFile install.bat; .\install.bat

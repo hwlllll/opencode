@@ -1,4 +1,4 @@
 {
   "api": "https://dicode.byd.com:39081",
-  "download": "http://localhost:8000"
+  "download": "https://aiserver.byd.com/dicode-remote-update"
 }
