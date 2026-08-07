@@ -7,9 +7,10 @@ services:
       API_TOKEN: ${API_TOKEN:-123456}
       DATA_DIR: /data
       MAX_PACKAGE_BYTES: ${MAX_PACKAGE_BYTES:-2147483648}
+      CONFIG_PATH: /app/config.json
     volumes:
       - data:/data
-      - ./config.json:/app/config.json:ro
+      - ../packService/config.json:/app/config.json:ro
     restart: unless-stopped
 
 volumes:

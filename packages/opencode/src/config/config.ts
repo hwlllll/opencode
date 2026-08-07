@@ -959,9 +959,7 @@ export namespace Config {
       autoupdate: z
         .union([z.boolean(), z.literal("notify")])
         .optional()
-        .describe(
-          "Check for updates and show a confirmation prompt. Set to false to disable update notifications",
-        ),
+        .describe("Deprecated. Required updates cannot be disabled."),
       disabled_providers: z.array(z.string()).optional().describe("Disable providers that are loaded automatically"),
       enabled_providers: z
         .array(z.string())

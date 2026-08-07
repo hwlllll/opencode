@@ -33,6 +33,9 @@ Options:
   --skip-build        Package an existing build
   -h, --help          Show this help
 
+Output:
+  packService/dist/<version>/
+
 Examples:
   bun run build:dicode
   DICODE_VERSION=1.0.0 bun run build:dicode --target linux-x64-baseline,windows-x64-baseline`)
@@ -67,7 +70,7 @@ if (!args.includes("--skip-build")) {
 }
 
 const dist = path.join(root, "packages/opencode/dist")
-const out = path.join(dist, version)
+const out = path.join(import.meta.dir, "dist", version)
 await mkdir(out, { recursive: true })
 
 const archives = await Promise.all(

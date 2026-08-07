@@ -125,9 +125,16 @@ export const ProviderRoutes = lazy(() =>
       }),
       async (c) => {
         const connected = await Provider.list()
+        const all = Object.values(connected)
+        const defaults = Object.fromEntries(
+          all.flatMap((item) => {
+            const model = Provider.sort(Object.values(item.models))[0]
+            return model ? [[item.id, model.id]] : []
+          }),
+        )
         return c.json({
-          all: Object.values(connected),
-          default: mapValues(connected, (item) => Provider.sort(Object.values(item.models))[0].id),
+          all,
+          default: defaults,
           connected: Object.keys(connected),
         })
       },

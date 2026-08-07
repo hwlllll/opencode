@@ -879,38 +879,25 @@ function App(props: { onSnapshot?: () => Promise<string[]>; ready?: () => void }
   sdk.event.on("installation.update-available", async (evt) => {
     const version = evt.properties.version
 
-    const skipped = kv.get("skipped_version")
-    if (skipped === version) return
-
-    const choice = await DialogConfirm.show(
+    await DialogConfirm.show(
       dialog,
-      `Update Available`,
-      `A new release v${version} is available. Would you like to update now?`,
-      "skip",
+      "Update Required",
+      `Dicode v${version} is required to continue. Confirm to update now.`,
+      undefined,
+      true,
     )
-
-    if (choice === false) {
-      kv.set("skipped_version", version)
-      return
-    }
-
-    if (choice !== true) return
 
     toast.show({
       variant: "info",
-      message: `Updating to v${version}...`,
+      message: `Updating to required version v${version}...`,
       duration: 30000,
     })
 
     const result = await sdk.client.global.upgrade({ target: version })
 
     if (result.error || !result.data?.success) {
-      toast.show({
-        variant: "error",
-        title: "Update Failed",
-        message: "Update failed",
-        duration: 10000,
-      })
+      await DialogAlert.show(dialog, "Update Failed", "The update is required. Please retry after restarting Dicode.")
+      exit()
       return
     }
 

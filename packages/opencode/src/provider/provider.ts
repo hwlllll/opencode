@@ -988,33 +988,7 @@ export namespace Provider {
             source: "custom",
             env: ["COSTRICT_API_KEY"],
             options: {},
-            models: {
-              Auto: {
-                id: ModelID.make("Auto"),
-                name: "Auto",
-                providerID: ProviderID.costrict,
-                status: "active",
-                api: {
-                  id: "Auto",
-                  url: "https://zgsm.sangfor.com/chat-rag/api/v1",
-                  npm: "@ai-sdk/openai-compatible",
-                },
-                capabilities: {
-                  temperature: true,
-                  reasoning: false,
-                  attachment: false,
-                  toolcall: true,
-                  input: { text: true, audio: false, image: false, video: false, pdf: false },
-                  output: { text: true, audio: false, image: false, video: false, pdf: false },
-                  interleaved: false,
-                },
-                limit: { context: 128000, output: 8192 },
-                cost: { input: 0, output: 0, cache: { read: 0, write: 0 } },
-                options: {},
-                headers: {},
-                release_date: new Date().toISOString(),
-              },
-            },
+            models: {},
           }
 
           const configProviders = Object.entries(cfg.provider ?? {})
@@ -1274,7 +1248,7 @@ export namespace Provider {
               }
             }
 
-            if (Object.keys(provider.models).length === 0) {
+            if (providerID !== ProviderID.costrict && Object.keys(provider.models).length === 0) {
               delete providers[providerID]
               continue
             }
@@ -1535,9 +1509,6 @@ export namespace Provider {
         if (providerID.startsWith("opencode")) {
           priority = ["gpt-5-nano"]
         }
-        if (providerID.startsWith("costrict")) {
-          priority = ["Auto"]
-        }
         if (providerID.startsWith("github-copilot")) {
           priority = ["gpt-5-mini", "claude-haiku-4.5", ...priority]
         }
@@ -1575,15 +1546,6 @@ export namespace Provider {
         if (cfg.model) return parseModel(cfg.model)
 
         const s = yield* InstanceState.get(cache)
-
-        // Try costrict provider first as the default for new users
-        const costrictProvider = s.providers[ProviderID.costrict]
-        if (costrictProvider && costrictProvider.models["Auto"]) {
-          return {
-            providerID: ProviderID.make("costrict"),
-            modelID: ModelID.make("Auto"),
-          }
-        }
 
         const recent = yield* Effect.promise(() =>
           Filesystem.readJson<{

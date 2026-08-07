@@ -42,7 +42,7 @@ export API_TOKEN='替换为强随机密钥'
 docker compose up --build -d
 ```
 
-启动前编辑 `config.json`：
+启动前编辑 `../packService/config.json`：
 
 ```json
 {
@@ -114,7 +114,8 @@ DICODE_VERSION=1.2.3 \
 bun run build:dicode --target linux-x64-baseline --skip-build
 ```
 
-脚本只负责构建和 Dicode 标准命名压缩，不连接发布服务。
+脚本只负责构建和 Dicode 标准命名压缩，不连接发布服务。压缩包输出到
+`packService/dist/<版本>/`。
 
 ### 手动上传
 
@@ -203,10 +204,10 @@ data/
 curl -fsSL https://download.example.com/install.sh | bash
 ```
 
-服务端从 `config.json` 读取两个地址，并通过动态安装脚本写入客户端
+服务端从 `../packService/config.json` 读取两个地址，并通过动态安装脚本写入客户端
 `~/.dicode/config.json`：
 
 - `download` 用于版本查询、升级和安装包下载。
 - `api` 用于登录、鉴权和业务 API。
 
-修改地址时只需更新服务端 `config.json` 并重启发布服务；用户重新执行安装命令后会更新本地配置。
+修改地址时只需更新 `packService/config.json` 并重启发布服务；用户重新执行安装命令后会更新本地配置。

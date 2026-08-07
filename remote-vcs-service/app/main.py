@@ -17,7 +17,9 @@ root = Path(os.getenv("DATA_DIR", "./data")).resolve()
 releases = root / "releases"
 latest = root / "latest"
 token = os.getenv("API_TOKEN")
-config = Path("config.json").resolve()
+config = Path(os.getenv("CONFIG_PATH", "config.json")).resolve()
+if not config.is_file():
+    config = Path(__file__).resolve().parents[2] / "packService" / "config.json"
 settings = json.loads(config.read_text()) if config.is_file() else {}
 public = str(settings.get("download", "")).rstrip("/")
 backend = str(settings.get("api", "")).rstrip("/")

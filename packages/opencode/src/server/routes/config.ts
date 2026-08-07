@@ -90,10 +90,16 @@ export const ConfigRoutes = lazy(() =>
           if (b.id === "costrict") return 1
           return 0
         })
+        const defaults = Object.fromEntries(
+          providerArray.flatMap((item) => {
+            const model = Provider.sort(Object.values(item.models))[0]
+            return model ? [[item.id, model.id]] : []
+          }),
+        )
 
         return c.json({
           providers: providerArray,
-          default: mapValues(providers, (item) => Provider.sort(Object.values(item.models))[0].id),
+          default: defaults,
         })
       },
     ),
